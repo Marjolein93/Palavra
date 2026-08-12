@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Palavra — Europees Portugees</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#123147">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Palavra">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16273A;
+    --azulejo:#2B5C7E;
+    --azulejo-deep:#123147;
+    --paper:#FBF9F3;
+    --paper-dim:#F1ECDF;
+    --gold:#C9982F;
+    --coral:#BE4438;
+    --sage:#4C7A5B;
+    --line: rgba(22,39,58,0.12);
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(18,49,71,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{
+    max-width: 480px;
+    margin: 0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    background: var(--paper);
+    box-shadow: var(--shadow);
+  }
+
+  /* ---- Header: azulejo tile band ---- */
+  .header{
+    position:relative;
+    background: var(--azulejo-deep);
+    background-image:
+      radial-gradient(circle at 12px 12px, rgba(255,255,255,0.14) 0 4px, transparent 5px),
+      radial-gradient(circle at 36px 36px, rgba(255,255,255,0.14) 0 4px, transparent 5px),
+      linear-gradient(135deg, var(--azulejo-deep) 0%, var(--azulejo) 100%);
+    background-size: 48px 48px, 48px 48px, 100% 100%;
+    padding: 22px 20px 18px;
+    color: var(--paper);
+  }
+  .header-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .brand-mark{
+    width:22px;height:22px;border-radius:4px;
+    background: linear-gradient(135deg, var(--gold), #E8C46B);
+    display:inline-block;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5);
+  }
+  .brand h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 21px;
+    letter-spacing: 0.2px;
+    margin:0;
+  }
+  .icon-btn{
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.28);
+    color: var(--paper);
+    width:36px;height:36px;
+    border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    font-size:16px;
+  }
+  .icon-btn:active{ transform: scale(0.95); }
+
+  .lang-picker{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:16px;
+  }
+  .lang-dropdown{
+    position:relative;
+  }
+  .flag-toggle{
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 12px;
+    width:52px;
+    height:44px;
+    font-size:22px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .flag-toggle:active{ transform: scale(0.95); }
+  .flag-icon{
+    display:inline-flex;
+    width:26px;
+    height:18px;
+    border-radius:3px;
+    overflow:hidden;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.15);
+    flex-shrink:0;
+    vertical-align:middle;
+  }
+  .flag-icon svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .lang-menu-item{ align-items:center; }
+  .lang-menu{
+    display:none;
+    position:absolute;
+    top:calc(100% + 6px);
+    left:50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    min-width:170px;
+    overflow:hidden;
+    z-index:30;
+  }
+  .lang-menu.open{ display:block; }
+  .lang-menu-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding: 10px 14px;
+    font-size:14px;
+    font-weight:500;
+    color: var(--ink);
+    cursor:pointer;
+  }
+  .lang-menu-item:hover{ background: var(--paper-dim); }
+  .lang-menu-item.selected{
+    background: rgba(43,92,126,0.1);
+    font-weight:700;
+    color: var(--azulejo-deep);
+  }
+  .swap-btn{
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.28);
+    color: var(--paper);
+    width:34px; height:34px;
+    border-radius:50%;
+    font-size:16px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .swap-btn:active{ transform: scale(0.92) rotate(180deg); }
+  .pkg-label{
+    font-size:12.5px;
+    color: rgba(255,255,255,0.7);
+    margin-top:12px;
+    font-weight:500;
+  }
+  .package-view{
+    padding: 20px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .package-card{
+    background:white;
+    border:1.5px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    cursor:pointer;
+    transition: border-color .12s ease, transform .06s ease;
+  }
+  .package-card:active{ transform: scale(0.99); }
+  .package-card.active{
+    border-color: var(--azulejo);
+    background: rgba(43,92,126,0.05);
+  }
+  .package-card-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:18px;
+    color: var(--ink);
+  }
+  .package-card-desc{
+    font-size:13px;
+    color: rgba(22,39,58,0.55);
+    margin-top:4px;
+  }
+  .package-card-tag{
+    display:inline-block;
+    margin-top:10px;
+    font-size:11.5px;
+    font-weight:600;
+    color: var(--sage);
+    background: rgba(76,122,91,0.12);
+    padding:4px 10px;
+    border-radius:999px;
+  }
+  .package-card-btn{
+    margin-top:12px;
+    background: var(--azulejo-deep);
+    color: var(--paper);
+    border:none;
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+
+  /* ---- Total word tracker (signature element, bottom of quiz) ---- */
+  .total-tracker{
+    padding-top:4px;
+  }
+  .total-tracker-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12.5px;
+    color: rgba(22,39,58,0.6);
+    font-family:'JetBrains Mono', monospace;
+    margin-bottom:6px;
+  }
+  .streak-badge{
+    font-weight:700;
+    color: var(--gold);
+  }
+  .total-tracker-bar{
+    height:8px;
+    border-radius:4px;
+    background: rgba(22,39,58,0.09);
+    overflow:hidden;
+  }
+  .total-tracker-fill{
+    height:100%;
+    background: linear-gradient(90deg, var(--gold), var(--azulejo));
+    transition: width .4s ease;
+  }
+
+  /* ---- Main quiz area ---- */
+  .main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    padding: 22px 20px 28px;
+    gap:18px;
+  }
+  .prompt-card{
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 34px 20px;
+    text-align:center;
+    position:relative;
+  }
+  .prompt-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.4px;
+    color: var(--azulejo);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  .prompt-word{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 36px;
+    line-height:1.15;
+    color: var(--ink);
+    word-break: break-word;
+  }
+  .prompt-freq{
+    margin-top:10px;
+    font-size:11.5px;
+    color: rgba(22,39,58,0.4);
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  .options{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+  }
+  .option{
+    background:white;
+    border:1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 12px;
+    min-height: 76px;
+    font-size:16px;
+    font-weight:500;
+    text-align:center;
+    color: var(--ink);
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    transition: border-color .12s ease, background .12s ease, transform .06s ease;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .option:active{ transform: scale(0.985); }
+  .option.correct{
+    background: rgba(76,122,91,0.1);
+    border-color: var(--sage);
+    color: var(--sage);
+  }
+  .option.incorrect{
+    background: rgba(190,68,56,0.08);
+    border-color: var(--coral);
+    color: var(--coral);
+  }
+  .option.answered:not(.correct):not(.incorrect){ opacity:0.5; }
+  .option.answered{ cursor:pointer; }
+  .option-mark{ font-size:15px; font-weight:700; }
+
+  .feedback-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-height: 30px;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .feedback-text{
+    font-size:14px;
+    font-weight:600;
+  }
+  .feedback-text.ok{ color: var(--sage); }
+  .feedback-text.no{ color: var(--coral); }
+  .tap-hint{
+    font-size:12.5px;
+    color: rgba(22,39,58,0.45);
+    font-style:italic;
+  }
+
+  /* ---- Stats view ---- */
+  .stats-view{ padding: 20px; display:none; flex-direction:column; gap:16px; }
+  .stats-view.visible{ display:flex; }
+  .main.hidden{ display:none; }
+  .stats-summary{
+    background: var(--azulejo-deep);
+    color: var(--paper);
+    border-radius: var(--radius);
+    padding: 18px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+  }
+  .stats-summary > div{ flex:1; text-align:center; }
+  .stats-summary .big{
+    font-family:'Fraunces', serif;
+    font-size: 24px;
+    font-weight:700;
+  }
+  .stats-summary .lbl{ font-size:11px; opacity:0.75; margin-top:2px;}
+  .word-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .word-row .wp{ flex:1; font-weight:600; font-size:14.5px; }
+  .word-row .wn{ color: rgba(22,39,58,0.55); font-size:13px; flex:1; }
+  .word-row .wb{
+    width:70px; height:7px; border-radius:4px; background: rgba(22,39,58,0.09); overflow:hidden;
+  }
+  .word-row .wb .f{ height:100%; background: linear-gradient(90deg, var(--gold), var(--azulejo)); }
+  .word-row .wpct{ width:38px; text-align:right; font-family:'JetBrains Mono', monospace; font-size:12px; color: rgba(22,39,58,0.6);}
+  .section-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:16px;
+    margin: 4px 0 0;
+  }
+  .reset-btn{
+    margin-top:8px;
+    background:none;
+    border:1px solid var(--coral);
+    color: var(--coral);
+    padding:10px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .loading{
+    display:flex; align-items:center; justify-content:center;
+    height: 60vh;
+    color: rgba(22,39,58,0.5);
+    font-size:14px;
+    font-family:'JetBrains Mono', monospace;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="loading" id="loadingScreen">Voortgang laden…</div>
+</div>
+
+<script>
+const WORD_BANK_BASIS = [{"pt": "eu", "nl": "ik", "en": "I", "cat": "voornaamwoorden"}, {"pt": "tu", "nl": "jij", "en": "you", "cat": "voornaamwoorden"}, {"pt": "ele", "nl": "hij", "en": "he", "cat": "voornaamwoorden"}, {"pt": "ela", "nl": "zij", "en": "she", "cat": "voornaamwoorden"}, {"pt": "nós", "nl": "wij", "en": "we", "cat": "voornaamwoorden"}, {"pt": "vocês", "nl": "jullie", "en": "you (pl.)", "cat": "voornaamwoorden"}, {"pt": "eles", "nl": "zij (mv)", "en": "they", "cat": "voornaamwoorden"}, {"pt": "meu", "nl": "mijn", "en": "my", "cat": "voornaamwoorden"}, {"pt": "teu", "nl": "jouw", "en": "your", "cat": "voornaamwoorden"}, {"pt": "seu", "nl": "zijn/haar", "en": "his/her", "cat": "voornaamwoorden"}, {"pt": "nosso", "nl": "ons/onze", "en": "our", "cat": "voornaamwoorden"}, {"pt": "sim", "nl": "ja", "en": "yes", "cat": "begroetingen_beleefdheid"}, {"pt": "não", "nl": "nee", "en": "no", "cat": "begroetingen_beleefdheid"}, {"pt": "talvez", "nl": "misschien", "en": "maybe", "cat": "begroetingen_beleefdheid"}, {"pt": "por favor", "nl": "alsjeblieft", "en": "please", "cat": "begroetingen_beleefdheid"}, {"pt": "obrigado", "nl": "dank je", "en": "thank you", "cat": "begroetingen_beleefdheid"}, {"pt": "desculpa", "nl": "sorry", "en": "sorry", "cat": "begroetingen_beleefdheid"}, {"pt": "olá", "nl": "hallo", "en": "hello", "cat": "begroetingen_beleefdheid"}, {"pt": "adeus", "nl": "tot ziens", "en": "goodbye", "cat": "begroetingen_beleefdheid"}, {"pt": "bom dia", "nl": "goedemorgen", "en": "good morning", "cat": "begroetingen_beleefdheid"}, {"pt": "boa noite", "nl": "goedenacht", "en": "good night", "cat": "begroetingen_beleefdheid"}, {"pt": "com licença", "nl": "pardon", "en": "excuse me", "cat": "begroetingen_beleefdheid"}, {"pt": "de nada", "nl": "graag gedaan", "en": "you're welcome", "cat": "begroetingen_beleefdheid"}, {"pt": "bem-vindo", "nl": "welkom", "en": "welcome", "cat": "begroetingen_beleefdheid"}, {"pt": "aqui", "nl": "hier", "en": "here", "cat": "plaats_tijd_bijwoorden"}, {"pt": "ali", "nl": "daar", "en": "there", "cat": "plaats_tijd_bijwoorden"}, {"pt": "agora", "nl": "nu", "en": "now", "cat": "plaats_tijd_bijwoorden"}, {"pt": "depois", "nl": "later", "en": "later", "cat": "plaats_tijd_bijwoorden"}, {"pt": "sempre", "nl": "altijd", "en": "always", "cat": "plaats_tijd_bijwoorden"}, {"pt": "nunca", "nl": "nooit", "en": "never", "cat": "plaats_tijd_bijwoorden"}, {"pt": "também", "nl": "ook", "en": "also", "cat": "plaats_tijd_bijwoorden"}, {"pt": "perto", "nl": "dichtbij", "en": "near", "cat": "plaats_tijd_bijwoorden"}, {"pt": "longe", "nl": "ver weg", "en": "far", "cat": "plaats_tijd_bijwoorden"}, {"pt": "dentro", "nl": "binnen", "en": "inside", "cat": "plaats_tijd_bijwoorden"}, {"pt": "fora", "nl": "buiten", "en": "outside", "cat": "plaats_tijd_bijwoorden"}, {"pt": "em cima", "nl": "boven", "en": "on top/above", "cat": "plaats_tijd_bijwoorden"}, {"pt": "em baixo", "nl": "beneden", "en": "below", "cat": "plaats_tijd_bijwoorden"}, {"pt": "muito", "nl": "heel", "en": "very/a lot", "cat": "hoeveelheid"}, {"pt": "pouco", "nl": "weinig", "en": "little", "cat": "hoeveelheid"}, {"pt": "tudo", "nl": "alles", "en": "everything", "cat": "hoeveelheid"}, {"pt": "nada", "nl": "niets", "en": "nothing", "cat": "hoeveelheid"}, {"pt": "mais", "nl": "meer", "en": "more", "cat": "hoeveelheid"}, {"pt": "menos", "nl": "minder", "en": "less", "cat": "hoeveelheid"}, {"pt": "todo", "nl": "elk", "en": "every", "cat": "hoeveelheid"}, {"pt": "algum", "nl": "sommige", "en": "some", "cat": "hoeveelheid"}, {"pt": "vários", "nl": "verschillende", "en": "several", "cat": "hoeveelheid"}, {"pt": "quem", "nl": "wie", "en": "who", "cat": "vraagwoorden"}, {"pt": "o que", "nl": "wat", "en": "what", "cat": "vraagwoorden"}, {"pt": "quando", "nl": "wanneer", "en": "when", "cat": "vraagwoorden"}, {"pt": "onde", "nl": "waar", "en": "where", "cat": "vraagwoorden"}, {"pt": "porquê", "nl": "waarom", "en": "why", "cat": "vraagwoorden"}, {"pt": "como", "nl": "hoe", "en": "how", "cat": "vraagwoorden"}, {"pt": "qual", "nl": "welke", "en": "which", "cat": "vraagwoorden"}, {"pt": "quanto", "nl": "hoeveel", "en": "how much", "cat": "vraagwoorden"}, {"pt": "e", "nl": "en", "en": "and", "cat": "voegwoorden_voorzetsels"}, {"pt": "mas", "nl": "maar", "en": "but", "cat": "voegwoorden_voorzetsels"}, {"pt": "ou", "nl": "of", "en": "or", "cat": "voegwoorden_voorzetsels"}, {"pt": "porque", "nl": "omdat", "en": "because", "cat": "voegwoorden_voorzetsels"}, {"pt": "com", "nl": "met", "en": "with", "cat": "voegwoorden_voorzetsels"}, {"pt": "sem", "nl": "zonder", "en": "without", "cat": "voegwoorden_voorzetsels"}, {"pt": "para", "nl": "voor", "en": "for", "cat": "voegwoorden_voorzetsels"}, {"pt": "em", "nl": "in", "en": "in", "cat": "voegwoorden_voorzetsels"}, {"pt": "sobre", "nl": "over", "en": "about", "cat": "voegwoorden_voorzetsels"}, {"pt": "entre", "nl": "tussen", "en": "between", "cat": "voegwoorden_voorzetsels"}, {"pt": "ser", "nl": "zijn (blijvend)", "en": "to be (permanent)", "cat": "werkwoorden_zijn_hebben"}, {"pt": "estar", "nl": "zijn (tijdelijk)", "en": "to be (temporary)", "cat": "werkwoorden_zijn_hebben"}, {"pt": "ter", "nl": "hebben", "en": "to have", "cat": "werkwoorden_zijn_hebben"}, {"pt": "ir", "nl": "gaan", "en": "to go", "cat": "werkwoorden_zijn_hebben"}, {"pt": "vir", "nl": "komen", "en": "to come", "cat": "werkwoorden_zijn_hebben"}, {"pt": "fazer", "nl": "doen", "en": "to do/make", "cat": "werkwoorden_zijn_hebben"}, {"pt": "existir", "nl": "bestaan", "en": "to exist", "cat": "werkwoorden_zijn_hebben"}, {"pt": "dizer", "nl": "zeggen", "en": "to say", "cat": "werkwoorden_communicatie"}, {"pt": "falar", "nl": "praten", "en": "to speak", "cat": "werkwoorden_communicatie"}, {"pt": "ver", "nl": "zien", "en": "to see", "cat": "werkwoorden_communicatie"}, {"pt": "ouvir", "nl": "horen", "en": "to hear", "cat": "werkwoorden_communicatie"}, {"pt": "escrever", "nl": "schrijven", "en": "to write", "cat": "werkwoorden_communicatie"}, {"pt": "ler", "nl": "lezen", "en": "to read", "cat": "werkwoorden_communicatie"}, {"pt": "perguntar", "nl": "vragen", "en": "to ask", "cat": "werkwoorden_communicatie"}, {"pt": "responder", "nl": "antwoorden", "en": "to answer", "cat": "werkwoorden_communicatie"}, {"pt": "explicar", "nl": "uitleggen", "en": "to explain", "cat": "werkwoorden_communicatie"}, {"pt": "contar", "nl": "vertellen", "en": "to tell", "cat": "werkwoorden_communicatie"}, {"pt": "querer", "nl": "willen", "en": "to want", "cat": "werkwoorden_mentaal"}, {"pt": "poder", "nl": "kunnen", "en": "to be able to", "cat": "werkwoorden_mentaal"}, {"pt": "saber", "nl": "weten", "en": "to know (fact)", "cat": "werkwoorden_mentaal"}, {"pt": "conhecer", "nl": "kennen", "en": "to know (person/place)", "cat": "werkwoorden_mentaal"}, {"pt": "pensar", "nl": "denken", "en": "to think", "cat": "werkwoorden_mentaal"}, {"pt": "achar", "nl": "vinden (mening)", "en": "to think (opinion)", "cat": "werkwoorden_mentaal"}, {"pt": "esperar", "nl": "wachten", "en": "to wait/hope", "cat": "werkwoorden_mentaal"}, {"pt": "lembrar", "nl": "herinneren", "en": "to remember", "cat": "werkwoorden_mentaal"}, {"pt": "esquecer", "nl": "vergeten", "en": "to forget", "cat": "werkwoorden_mentaal"}, {"pt": "decidir", "nl": "beslissen", "en": "to decide", "cat": "werkwoorden_mentaal"}, {"pt": "imaginar", "nl": "voorstellen", "en": "to imagine", "cat": "werkwoorden_mentaal"}, {"pt": "duvidar", "nl": "twijfelen", "en": "to doubt", "cat": "werkwoorden_mentaal"}, {"pt": "comer", "nl": "eten", "en": "to eat", "cat": "werkwoorden_dagelijks"}, {"pt": "beber", "nl": "drinken", "en": "to drink", "cat": "werkwoorden_dagelijks"}, {"pt": "dormir", "nl": "slapen", "en": "to sleep", "cat": "werkwoorden_dagelijks"}, {"pt": "acordar", "nl": "wakker worden", "en": "to wake up", "cat": "werkwoorden_dagelijks"}, {"pt": "trabalhar", "nl": "werken", "en": "to work", "cat": "werkwoorden_dagelijks"}, {"pt": "estudar", "nl": "studeren", "en": "to study", "cat": "werkwoorden_dagelijks"}, {"pt": "aprender", "nl": "leren", "en": "to learn", "cat": "werkwoorden_dagelijks"}, {"pt": "ensinar", "nl": "onderwijzen", "en": "to teach", "cat": "werkwoorden_dagelijks"}, {"pt": "comprar", "nl": "kopen", "en": "to buy", "cat": "werkwoorden_dagelijks"}, {"pt": "vender", "nl": "verkopen", "en": "to sell", "cat": "werkwoorden_dagelijks"}, {"pt": "pagar", "nl": "betalen", "en": "to pay", "cat": "werkwoorden_dagelijks"}, {"pt": "ajudar", "nl": "helpen", "en": "to help", "cat": "werkwoorden_dagelijks"}, {"pt": "gostar", "nl": "leuk vinden", "en": "to like", "cat": "werkwoorden_dagelijks"}, {"pt": "cozinhar", "nl": "koken", "en": "to cook", "cat": "werkwoorden_dagelijks"}, {"pt": "limpar", "nl": "schoonmaken", "en": "to clean", "cat": "werkwoorden_dagelijks"}, {"pt": "lavar", "nl": "wassen", "en": "to wash", "cat": "werkwoorden_dagelijks"}, {"pt": "vestir", "nl": "aankleden", "en": "to dress", "cat": "werkwoorden_dagelijks"}, {"pt": "descansar", "nl": "uitrusten", "en": "to rest", "cat": "werkwoorden_dagelijks"}, {"pt": "procurar", "nl": "zoeken", "en": "to look for", "cat": "werkwoorden_beweging"}, {"pt": "encontrar", "nl": "vinden", "en": "to find", "cat": "werkwoorden_beweging"}, {"pt": "perder", "nl": "verliezen", "en": "to lose", "cat": "werkwoorden_beweging"}, {"pt": "abrir", "nl": "openen", "en": "to open", "cat": "werkwoorden_beweging"}, {"pt": "fechar", "nl": "sluiten", "en": "to close", "cat": "werkwoorden_beweging"}, {"pt": "começar", "nl": "beginnen", "en": "to begin", "cat": "werkwoorden_beweging"}, {"pt": "acabar", "nl": "eindigen", "en": "to end", "cat": "werkwoorden_beweging"}, {"pt": "chegar", "nl": "aankomen", "en": "to arrive", "cat": "werkwoorden_beweging"}, {"pt": "sair", "nl": "weggaan", "en": "to leave", "cat": "werkwoorden_beweging"}, {"pt": "entrar", "nl": "binnengaan", "en": "to enter", "cat": "werkwoorden_beweging"}, {"pt": "ficar", "nl": "blijven", "en": "to stay", "cat": "werkwoorden_beweging"}, {"pt": "viver", "nl": "leven", "en": "to live", "cat": "werkwoorden_beweging"}, {"pt": "morrer", "nl": "sterven", "en": "to die", "cat": "werkwoorden_beweging"}, {"pt": "nascer", "nl": "geboren worden", "en": "to be born", "cat": "werkwoorden_beweging"}, {"pt": "andar", "nl": "lopen", "en": "to walk", "cat": "werkwoorden_beweging"}, {"pt": "correr", "nl": "rennen", "en": "to run", "cat": "werkwoorden_beweging"}, {"pt": "voar", "nl": "vliegen", "en": "to fly", "cat": "werkwoorden_beweging"}, {"pt": "nadar", "nl": "zwemmen", "en": "to swim", "cat": "werkwoorden_beweging"}, {"pt": "jogar", "nl": "spelen", "en": "to play", "cat": "werkwoorden_beweging"}, {"pt": "ganhar", "nl": "winnen", "en": "to win", "cat": "werkwoorden_beweging"}, {"pt": "subir", "nl": "omhoog gaan", "en": "to go up", "cat": "werkwoorden_beweging"}, {"pt": "descer", "nl": "naar beneden gaan", "en": "to go down", "cat": "werkwoorden_beweging"}, {"pt": "parar", "nl": "stoppen", "en": "to stop", "cat": "werkwoorden_beweging"}, {"pt": "seguir", "nl": "volgen", "en": "to follow", "cat": "werkwoorden_beweging"}, {"pt": "mudar", "nl": "veranderen", "en": "to change", "cat": "werkwoorden_beweging"}, {"pt": "levar", "nl": "meenemen", "en": "to take/carry", "cat": "werkwoorden_actie_extra"}, {"pt": "trazer", "nl": "brengen", "en": "to bring", "cat": "werkwoorden_actie_extra"}, {"pt": "dar", "nl": "geven", "en": "to give", "cat": "werkwoorden_actie_extra"}, {"pt": "receber", "nl": "ontvangen", "en": "to receive", "cat": "werkwoorden_actie_extra"}, {"pt": "mostrar", "nl": "laten zien", "en": "to show", "cat": "werkwoorden_actie_extra"}, {"pt": "enviar", "nl": "versturen", "en": "to send", "cat": "werkwoorden_actie_extra"}, {"pt": "guardar", "nl": "bewaren", "en": "to keep/store", "cat": "werkwoorden_actie_extra"}, {"pt": "usar", "nl": "gebruiken", "en": "to use", "cat": "werkwoorden_actie_extra"}, {"pt": "família", "nl": "familie", "en": "family", "cat": "familieleden"}, {"pt": "pai", "nl": "vader", "en": "father", "cat": "familieleden"}, {"pt": "mãe", "nl": "moeder", "en": "mother", "cat": "familieleden"}, {"pt": "filho", "nl": "zoon", "en": "son", "cat": "familieleden"}, {"pt": "filha", "nl": "dochter", "en": "daughter", "cat": "familieleden"}, {"pt": "irmão", "nl": "broer", "en": "brother", "cat": "familieleden"}, {"pt": "irmã", "nl": "zus", "en": "sister", "cat": "familieleden"}, {"pt": "avô", "nl": "opa", "en": "grandfather", "cat": "familieleden"}, {"pt": "avó", "nl": "oma", "en": "grandmother", "cat": "familieleden"}, {"pt": "marido", "nl": "echtgenoot", "en": "husband", "cat": "familieleden"}, {"pt": "esposa", "nl": "echtgenote", "en": "wife", "cat": "familieleden"}, {"pt": "tio", "nl": "oom", "en": "uncle", "cat": "familieleden"}, {"pt": "tia", "nl": "tante", "en": "aunt", "cat": "familieleden"}, {"pt": "primo", "nl": "neef", "en": "cousin", "cat": "familieleden"}, {"pt": "sobrinho", "nl": "neefje", "en": "nephew", "cat": "familieleden"}, {"pt": "namorado", "nl": "vriendje", "en": "boyfriend", "cat": "mensen_algemeen"}, {"pt": "amigo", "nl": "vriend", "en": "friend", "cat": "mensen_algemeen"}, {"pt": "rapariga", "nl": "meisje", "en": "girl", "cat": "mensen_algemeen"}, {"pt": "rapaz", "nl": "jongen", "en": "boy", "cat": "mensen_algemeen"}, {"pt": "criança", "nl": "kind", "en": "child", "cat": "mensen_algemeen"}, {"pt": "pessoa", "nl": "persoon", "en": "person", "cat": "mensen_algemeen"}, {"pt": "gente", "nl": "mensen", "en": "people", "cat": "mensen_algemeen"}, {"pt": "vizinho", "nl": "buur", "en": "neighbour", "cat": "mensen_algemeen"}, {"pt": "colega", "nl": "collega", "en": "colleague", "cat": "mensen_algemeen"}, {"pt": "estranho", "nl": "vreemdeling", "en": "stranger", "cat": "mensen_algemeen"}, {"pt": "adulto", "nl": "volwassene", "en": "adult", "cat": "mensen_algemeen"}, {"pt": "casa", "nl": "huis", "en": "house", "cat": "huis_kamers"}, {"pt": "casa de banho", "nl": "badkamer", "en": "bathroom", "cat": "huis_kamers"}, {"pt": "quarto", "nl": "slaapkamer", "en": "bedroom", "cat": "huis_kamers"}, {"pt": "cozinha", "nl": "keuken", "en": "kitchen", "cat": "huis_kamers"}, {"pt": "sala", "nl": "woonkamer", "en": "living room", "cat": "huis_kamers"}, {"pt": "sótão", "nl": "zolder", "en": "attic", "cat": "huis_kamers"}, {"pt": "garagem", "nl": "garage", "en": "garage", "cat": "huis_kamers"}, {"pt": "varanda", "nl": "balkon", "en": "balcony", "cat": "huis_kamers"}, {"pt": "porta", "nl": "deur", "en": "door", "cat": "huis_meubels"}, {"pt": "janela", "nl": "raam", "en": "window", "cat": "huis_meubels"}, {"pt": "mesa", "nl": "tafel", "en": "table", "cat": "huis_meubels"}, {"pt": "cadeira", "nl": "stoel", "en": "chair", "cat": "huis_meubels"}, {"pt": "cama", "nl": "bed", "en": "bed", "cat": "huis_meubels"}, {"pt": "frigorífico", "nl": "koelkast", "en": "fridge", "cat": "huis_meubels"}, {"pt": "chave", "nl": "sleutel", "en": "key", "cat": "huis_meubels"}, {"pt": "toalha", "nl": "handdoek", "en": "towel", "cat": "huis_meubels"}, {"pt": "espelho", "nl": "spiegel", "en": "mirror", "cat": "huis_meubels"}, {"pt": "elevador", "nl": "lift", "en": "elevator", "cat": "huis_meubels"}, {"pt": "sofá", "nl": "bank", "en": "sofa", "cat": "huis_meubels"}, {"pt": "estante", "nl": "boekenkast", "en": "bookcase", "cat": "huis_meubels"}, {"pt": "candeeiro", "nl": "lamp", "en": "lamp", "cat": "huis_meubels"}, {"pt": "tapete", "nl": "tapijt", "en": "rug", "cat": "huis_meubels"}, {"pt": "armário", "nl": "kast", "en": "cupboard", "cat": "huis_meubels"}, {"pt": "rua", "nl": "straat", "en": "street", "cat": "buurt_stad"}, {"pt": "cidade", "nl": "stad", "en": "city", "cat": "buurt_stad"}, {"pt": "jardim", "nl": "tuin", "en": "garden", "cat": "buurt_stad"}, {"pt": "loja", "nl": "winkel", "en": "shop", "cat": "buurt_stad"}, {"pt": "mercado", "nl": "markt", "en": "market", "cat": "buurt_stad"}, {"pt": "hospital", "nl": "ziekenhuis", "en": "hospital", "cat": "buurt_stad"}, {"pt": "escola", "nl": "school", "en": "school", "cat": "buurt_stad"}, {"pt": "trabalho", "nl": "werk", "en": "work", "cat": "buurt_stad"}, {"pt": "escritório", "nl": "kantoor", "en": "office", "cat": "buurt_stad"}, {"pt": "praia", "nl": "strand", "en": "beach", "cat": "buurt_stad"}, {"pt": "mar", "nl": "zee", "en": "sea", "cat": "buurt_stad"}, {"pt": "farmácia", "nl": "apotheek", "en": "pharmacy", "cat": "buurt_stad"}, {"pt": "banco", "nl": "bank (instelling)", "en": "bank", "cat": "buurt_stad"}, {"pt": "igreja", "nl": "kerk", "en": "church", "cat": "buurt_stad"}, {"pt": "museu", "nl": "museum", "en": "museum", "cat": "buurt_stad"}, {"pt": "parque", "nl": "park", "en": "park", "cat": "buurt_stad"}, {"pt": "biblioteca", "nl": "bibliotheek", "en": "library", "cat": "buurt_stad"}, {"pt": "polícia", "nl": "politie", "en": "police", "cat": "buurt_stad"}, {"pt": "autocarro", "nl": "bus", "en": "bus", "cat": "vervoer"}, {"pt": "comboio", "nl": "trein", "en": "train", "cat": "vervoer"}, {"pt": "carro", "nl": "auto", "en": "car", "cat": "vervoer"}, {"pt": "avião", "nl": "vliegtuig", "en": "airplane", "cat": "vervoer"}, {"pt": "bicicleta", "nl": "fiets", "en": "bicycle", "cat": "vervoer"}, {"pt": "estrada", "nl": "weg", "en": "road", "cat": "vervoer"}, {"pt": "aeroporto", "nl": "luchthaven", "en": "airport", "cat": "vervoer"}, {"pt": "estação", "nl": "station", "en": "station", "cat": "vervoer"}, {"pt": "bilhete", "nl": "kaartje", "en": "ticket", "cat": "vervoer"}, {"pt": "táxi", "nl": "taxi", "en": "taxi", "cat": "vervoer"}, {"pt": "metro", "nl": "metro", "en": "subway", "cat": "vervoer"}, {"pt": "barco", "nl": "boot", "en": "boat", "cat": "vervoer"}, {"pt": "paragem", "nl": "bushalte", "en": "bus stop", "cat": "vervoer"}, {"pt": "condutor", "nl": "bestuurder", "en": "driver", "cat": "vervoer"}, {"pt": "telemóvel", "nl": "mobiele telefoon", "en": "mobile phone", "cat": "technologie"}, {"pt": "computador", "nl": "computer", "en": "computer", "cat": "technologie"}, {"pt": "ecrã", "nl": "scherm", "en": "screen", "cat": "technologie"}, {"pt": "internet", "nl": "internet", "en": "internet", "cat": "technologie"}, {"pt": "aplicação", "nl": "app", "en": "app", "cat": "technologie"}, {"pt": "câmara", "nl": "camera", "en": "camera", "cat": "technologie"}, {"pt": "impressora", "nl": "printer", "en": "printer", "cat": "technologie"}, {"pt": "teclado", "nl": "toetsenbord", "en": "keyboard", "cat": "technologie"}, {"pt": "rato", "nl": "muis (computer)", "en": "mouse", "cat": "technologie"}, {"pt": "pequeno-almoço", "nl": "ontbijt", "en": "breakfast", "cat": "eten_maaltijden"}, {"pt": "almoço", "nl": "lunch", "en": "lunch", "cat": "eten_maaltijden"}, {"pt": "jantar", "nl": "avondeten", "en": "dinner", "cat": "eten_maaltijden"}, {"pt": "restaurante", "nl": "restaurant", "en": "restaurant", "cat": "eten_maaltijden"}, {"pt": "conta", "nl": "rekening", "en": "bill", "cat": "eten_maaltijden"}, {"pt": "lanche", "nl": "tussendoortje", "en": "snack", "cat": "eten_maaltijden"}, {"pt": "sobremesa", "nl": "toetje", "en": "dessert", "cat": "eten_maaltijden"}, {"pt": "receita", "nl": "recept", "en": "recipe", "cat": "eten_maaltijden"}, {"pt": "prato", "nl": "gerecht", "en": "dish", "cat": "eten_maaltijden"}, {"pt": "água", "nl": "water", "en": "water", "cat": "dranken"}, {"pt": "sumo", "nl": "sap", "en": "juice", "cat": "dranken"}, {"pt": "leite", "nl": "melk", "en": "milk", "cat": "dranken"}, {"pt": "café", "nl": "koffie", "en": "coffee", "cat": "dranken"}, {"pt": "chá", "nl": "thee", "en": "tea", "cat": "dranken"}, {"pt": "vinho", "nl": "wijn", "en": "wine", "cat": "dranken"}, {"pt": "cerveja", "nl": "bier", "en": "beer", "cat": "dranken"}, {"pt": "refrigerante", "nl": "frisdrank", "en": "soft drink", "cat": "dranken"}, {"pt": "pão", "nl": "brood", "en": "bread", "cat": "voedsel"}, {"pt": "queijo", "nl": "kaas", "en": "cheese", "cat": "voedsel"}, {"pt": "carne", "nl": "vlees", "en": "meat", "cat": "voedsel"}, {"pt": "peixe", "nl": "vis", "en": "fish", "cat": "voedsel"}, {"pt": "ovo", "nl": "ei", "en": "egg", "cat": "voedsel"}, {"pt": "arroz", "nl": "rijst", "en": "rice", "cat": "voedsel"}, {"pt": "sopa", "nl": "soep", "en": "soup", "cat": "voedsel"}, {"pt": "fruta", "nl": "fruit", "en": "fruit", "cat": "voedsel"}, {"pt": "maçã", "nl": "appel", "en": "apple", "cat": "voedsel"}, {"pt": "laranja", "nl": "sinaasappel", "en": "orange", "cat": "voedsel"}, {"pt": "batata", "nl": "aardappel", "en": "potato", "cat": "voedsel"}, {"pt": "açúcar", "nl": "suiker", "en": "sugar", "cat": "voedsel"}, {"pt": "sal", "nl": "zout", "en": "salt", "cat": "voedsel"}, {"pt": "gelado", "nl": "ijsje", "en": "ice cream", "cat": "voedsel"}, {"pt": "legumes", "nl": "groenten", "en": "vegetables", "cat": "voedsel"}, {"pt": "cenoura", "nl": "wortel", "en": "carrot", "cat": "voedsel"}, {"pt": "cebola", "nl": "ui", "en": "onion", "cat": "voedsel"}, {"pt": "alho", "nl": "knoflook", "en": "garlic", "cat": "voedsel"}, {"pt": "azeite", "nl": "olijfolie", "en": "olive oil", "cat": "voedsel"}, {"pt": "manteiga", "nl": "boter", "en": "butter", "cat": "voedsel"}, {"pt": "iogurte", "nl": "yoghurt", "en": "yoghurt", "cat": "voedsel"}, {"pt": "bolo", "nl": "taart", "en": "cake", "cat": "voedsel"}, {"pt": "chocolate", "nl": "chocolade", "en": "chocolate", "cat": "voedsel"}, {"pt": "faca", "nl": "mes", "en": "knife", "cat": "keuken_gerei"}, {"pt": "garfo", "nl": "vork", "en": "fork", "cat": "keuken_gerei"}, {"pt": "colher", "nl": "lepel", "en": "spoon", "cat": "keuken_gerei"}, {"pt": "copo", "nl": "glas", "en": "glass", "cat": "keuken_gerei"}, {"pt": "panela", "nl": "pan", "en": "pot", "cat": "keuken_gerei"}, {"pt": "forno", "nl": "oven", "en": "oven", "cat": "keuken_gerei"}, {"pt": "fogão", "nl": "fornuis", "en": "stove", "cat": "keuken_gerei"}, {"pt": "um", "nl": "een", "en": "one", "cat": "getallen_kardinaal"}, {"pt": "dois", "nl": "twee", "en": "two", "cat": "getallen_kardinaal"}, {"pt": "três", "nl": "drie", "en": "three", "cat": "getallen_kardinaal"}, {"pt": "quatro", "nl": "vier", "en": "four", "cat": "getallen_kardinaal"}, {"pt": "cinco", "nl": "vijf", "en": "five", "cat": "getallen_kardinaal"}, {"pt": "seis", "nl": "zes", "en": "six", "cat": "getallen_kardinaal"}, {"pt": "sete", "nl": "zeven", "en": "seven", "cat": "getallen_kardinaal"}, {"pt": "oito", "nl": "acht", "en": "eight", "cat": "getallen_kardinaal"}, {"pt": "nove", "nl": "negen", "en": "nine", "cat": "getallen_kardinaal"}, {"pt": "dez", "nl": "tien", "en": "ten", "cat": "getallen_kardinaal"}, {"pt": "vinte", "nl": "twintig", "en": "twenty", "cat": "getallen_kardinaal"}, {"pt": "cem", "nl": "honderd", "en": "hundred", "cat": "getallen_kardinaal"}, {"pt": "primeiro", "nl": "eerste", "en": "first", "cat": "getallen_ordinaal"}, {"pt": "último", "nl": "laatste", "en": "last", "cat": "getallen_ordinaal"}, {"pt": "segundo", "nl": "tweede", "en": "second", "cat": "getallen_ordinaal"}, {"pt": "terceiro", "nl": "derde", "en": "third", "cat": "getallen_ordinaal"}, {"pt": "dia", "nl": "dag", "en": "day", "cat": "tijdsperiodes"}, {"pt": "semana", "nl": "week", "en": "week", "cat": "tijdsperiodes"}, {"pt": "mês", "nl": "maand", "en": "month", "cat": "tijdsperiodes"}, {"pt": "ano", "nl": "jaar", "en": "year", "cat": "tijdsperiodes"}, {"pt": "hora", "nl": "uur", "en": "hour", "cat": "tijdsperiodes"}, {"pt": "minuto", "nl": "minuut", "en": "minute", "cat": "tijdsperiodes"}, {"pt": "século", "nl": "eeuw", "en": "century", "cat": "tijdsperiodes"}, {"pt": "época", "nl": "tijdperk", "en": "era", "cat": "tijdsperiodes"}, {"pt": "hoje", "nl": "vandaag", "en": "today", "cat": "tijdsaanduidingen"}, {"pt": "amanhã", "nl": "morgen", "en": "tomorrow", "cat": "tijdsaanduidingen"}, {"pt": "ontem", "nl": "gisteren", "en": "yesterday", "cat": "tijdsaanduidingen"}, {"pt": "manhã", "nl": "ochtend", "en": "morning", "cat": "tijdsaanduidingen"}, {"pt": "tarde", "nl": "middag", "en": "afternoon", "cat": "tijdsaanduidingen"}, {"pt": "noite", "nl": "avond", "en": "evening", "cat": "tijdsaanduidingen"}, {"pt": "cedo", "nl": "vroeg", "en": "early", "cat": "tijdsaanduidingen"}, {"pt": "tarde (adj)", "nl": "laat", "en": "late", "cat": "tijdsaanduidingen"}, {"pt": "meia-noite", "nl": "middernacht", "en": "midnight", "cat": "tijdsaanduidingen"}, {"pt": "meio-dia", "nl": "het middaguur", "en": "noon", "cat": "tijdsaanduidingen"}, {"pt": "segunda-feira", "nl": "maandag", "en": "Monday", "cat": "dagen_van_de_week"}, {"pt": "terça-feira", "nl": "dinsdag", "en": "Tuesday", "cat": "dagen_van_de_week"}, {"pt": "quarta-feira", "nl": "woensdag", "en": "Wednesday", "cat": "dagen_van_de_week"}, {"pt": "quinta-feira", "nl": "donderdag", "en": "Thursday", "cat": "dagen_van_de_week"}, {"pt": "sexta-feira", "nl": "vrijdag", "en": "Friday", "cat": "dagen_van_de_week"}, {"pt": "sábado", "nl": "zaterdag", "en": "Saturday", "cat": "dagen_van_de_week"}, {"pt": "domingo", "nl": "zondag", "en": "Sunday", "cat": "dagen_van_de_week"}, {"pt": "janeiro", "nl": "januari", "en": "January", "cat": "maanden"}, {"pt": "fevereiro", "nl": "februari", "en": "February", "cat": "maanden"}, {"pt": "março", "nl": "maart", "en": "March", "cat": "maanden"}, {"pt": "abril", "nl": "april", "en": "April", "cat": "maanden"}, {"pt": "maio", "nl": "mei", "en": "May", "cat": "maanden"}, {"pt": "junho", "nl": "juni", "en": "June", "cat": "maanden"}, {"pt": "julho", "nl": "juli", "en": "July", "cat": "maanden"}, {"pt": "agosto", "nl": "augustus", "en": "August", "cat": "maanden"}, {"pt": "setembro", "nl": "september", "en": "September", "cat": "maanden"}, {"pt": "outubro", "nl": "oktober", "en": "October", "cat": "maanden"}, {"pt": "novembro", "nl": "november", "en": "November", "cat": "maanden"}, {"pt": "dezembro", "nl": "december", "en": "December", "cat": "maanden"}, {"pt": "branco", "nl": "wit", "en": "white", "cat": "kleuren"}, {"pt": "preto", "nl": "zwart", "en": "black", "cat": "kleuren"}, {"pt": "vermelho", "nl": "rood", "en": "red", "cat": "kleuren"}, {"pt": "azul", "nl": "blauw", "en": "blue", "cat": "kleuren"}, {"pt": "verde", "nl": "groen", "en": "green", "cat": "kleuren"}, {"pt": "amarelo", "nl": "geel", "en": "yellow", "cat": "kleuren"}, {"pt": "cor-de-rosa", "nl": "roze", "en": "pink", "cat": "kleuren"}, {"pt": "cinzento", "nl": "grijs", "en": "grey", "cat": "kleuren"}, {"pt": "roxo", "nl": "paars", "en": "purple", "cat": "kleuren"}, {"pt": "castanho", "nl": "bruin", "en": "brown", "cat": "kleuren"}, {"pt": "dourado", "nl": "goudkleurig", "en": "golden", "cat": "kleuren"}, {"pt": "roupa", "nl": "kleding", "en": "clothes", "cat": "kleding"}, {"pt": "camisa", "nl": "overhemd", "en": "shirt", "cat": "kleding"}, {"pt": "calças", "nl": "broek", "en": "trousers", "cat": "kleding"}, {"pt": "sapatos", "nl": "schoenen", "en": "shoes", "cat": "kleding"}, {"pt": "casaco", "nl": "jas", "en": "coat", "cat": "kleding"}, {"pt": "chapéu", "nl": "hoed", "en": "hat", "cat": "kleding"}, {"pt": "vestido", "nl": "jurk", "en": "dress", "cat": "kleding"}, {"pt": "saia", "nl": "rok", "en": "skirt", "cat": "kleding"}, {"pt": "meias", "nl": "sokken", "en": "socks", "cat": "kleding"}, {"pt": "cinto", "nl": "riem", "en": "belt", "cat": "kleding"}, {"pt": "luvas", "nl": "handschoenen", "en": "gloves", "cat": "kleding"}, {"pt": "corpo", "nl": "lichaam", "en": "body", "cat": "lichaam"}, {"pt": "cabeça", "nl": "hoofd", "en": "head", "cat": "lichaam"}, {"pt": "mão", "nl": "hand", "en": "hand", "cat": "lichaam"}, {"pt": "pé", "nl": "voet", "en": "foot", "cat": "lichaam"}, {"pt": "olho", "nl": "oog", "en": "eye", "cat": "lichaam"}, {"pt": "boca", "nl": "mond", "en": "mouth", "cat": "lichaam"}, {"pt": "coração", "nl": "hart", "en": "heart", "cat": "lichaam"}, {"pt": "cabelo", "nl": "haar", "en": "hair", "cat": "lichaam"}, {"pt": "nariz", "nl": "neus", "en": "nose", "cat": "lichaam"}, {"pt": "orelha", "nl": "oor", "en": "ear", "cat": "lichaam"}, {"pt": "dente", "nl": "tand", "en": "tooth", "cat": "lichaam"}, {"pt": "perna", "nl": "been", "en": "leg", "cat": "lichaam"}, {"pt": "braço", "nl": "arm", "en": "arm", "cat": "lichaam"}, {"pt": "dedo", "nl": "vinger", "en": "finger", "cat": "lichaam"}, {"pt": "costas", "nl": "rug", "en": "back", "cat": "lichaam"}, {"pt": "doente", "nl": "ziek", "en": "sick", "cat": "gezondheid"}, {"pt": "dor", "nl": "pijn", "en": "pain", "cat": "gezondheid"}, {"pt": "remédio", "nl": "medicijn", "en": "medicine", "cat": "gezondheid"}, {"pt": "febre", "nl": "koorts", "en": "fever", "cat": "gezondheid"}, {"pt": "gripe", "nl": "griep", "en": "flu", "cat": "gezondheid"}, {"pt": "vacina", "nl": "vaccin", "en": "vaccine", "cat": "gezondheid"}, {"pt": "feliz", "nl": "blij", "en": "happy", "cat": "emoties"}, {"pt": "triste", "nl": "verdrietig", "en": "sad", "cat": "emoties"}, {"pt": "cansado", "nl": "moe", "en": "tired", "cat": "emoties"}, {"pt": "com fome", "nl": "hongerig", "en": "hungry", "cat": "emoties"}, {"pt": "com sede", "nl": "dorstig", "en": "thirsty", "cat": "emoties"}, {"pt": "zangado", "nl": "boos", "en": "angry", "cat": "emoties"}, {"pt": "assustado", "nl": "bang", "en": "scared", "cat": "emoties"}, {"pt": "surpreendido", "nl": "verrast", "en": "surprised", "cat": "emoties"}, {"pt": "orgulhoso", "nl": "trots", "en": "proud", "cat": "emoties"}, {"pt": "nervoso", "nl": "nerveus", "en": "nervous", "cat": "emoties"}, {"pt": "aborrecido", "nl": "geïrriteerd", "en": "annoyed", "cat": "emoties"}, {"pt": "bonito", "nl": "mooi", "en": "beautiful", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "feio", "nl": "lelijk", "en": "ugly", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "grande", "nl": "groot", "en": "big", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "pequeno", "nl": "klein", "en": "small", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "novo", "nl": "nieuw", "en": "new", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "velho", "nl": "oud", "en": "old", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "alto", "nl": "lang (persoon)", "en": "tall", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "baixo", "nl": "kort (persoon)", "en": "short", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "gordo", "nl": "dik", "en": "fat", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "magro", "nl": "dun", "en": "thin", "cat": "bijvoeglijk_uiterlijk_grootte"}, {"pt": "bom", "nl": "goed", "en": "good", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "mau", "nl": "slecht", "en": "bad", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "fácil", "nl": "makkelijk", "en": "easy", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "difícil", "nl": "moeilijk", "en": "difficult", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "rápido", "nl": "snel", "en": "fast", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "lento", "nl": "langzaam", "en": "slow", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "forte", "nl": "sterk", "en": "strong", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "fraco", "nl": "zwak", "en": "weak", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "limpo", "nl": "schoon", "en": "clean", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "sujo", "nl": "vies", "en": "dirty", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "importante", "nl": "belangrijk", "en": "important", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "interessante", "nl": "interessant", "en": "interesting", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "engraçado", "nl": "grappig", "en": "funny", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "chato", "nl": "saai", "en": "boring", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "quente", "nl": "warm", "en": "hot", "cat": "bijvoeglijk_prijs_temperatuur"}, {"pt": "frio", "nl": "koud", "en": "cold", "cat": "bijvoeglijk_prijs_temperatuur"}, {"pt": "caro", "nl": "duur", "en": "expensive", "cat": "bijvoeglijk_prijs_temperatuur"}, {"pt": "barato", "nl": "goedkoop", "en": "cheap", "cat": "bijvoeglijk_prijs_temperatuur"}, {"pt": "gratuito", "nl": "gratis", "en": "free", "cat": "bijvoeglijk_prijs_temperatuur"}, {"pt": "sol", "nl": "zon", "en": "sun", "cat": "natuur_weer"}, {"pt": "chuva", "nl": "regen", "en": "rain", "cat": "natuur_weer"}, {"pt": "vento", "nl": "wind", "en": "wind", "cat": "natuur_weer"}, {"pt": "neve", "nl": "sneeuw", "en": "snow", "cat": "natuur_weer"}, {"pt": "céu", "nl": "lucht", "en": "sky", "cat": "natuur_weer"}, {"pt": "nublado", "nl": "bewolkt", "en": "cloudy", "cat": "natuur_weer"}, {"pt": "trovoada", "nl": "onweer", "en": "thunderstorm", "cat": "natuur_weer"}, {"pt": "nevoeiro", "nl": "mist", "en": "fog", "cat": "natuur_weer"}, {"pt": "árvore", "nl": "boom", "en": "tree", "cat": "natuur_planten_dieren"}, {"pt": "flor", "nl": "bloem", "en": "flower", "cat": "natuur_planten_dieren"}, {"pt": "montanha", "nl": "berg", "en": "mountain", "cat": "natuur_planten_dieren"}, {"pt": "rio", "nl": "rivier", "en": "river", "cat": "natuur_planten_dieren"}, {"pt": "animal", "nl": "dier", "en": "animal", "cat": "natuur_planten_dieren"}, {"pt": "cão", "nl": "hond", "en": "dog", "cat": "natuur_planten_dieren"}, {"pt": "gato", "nl": "kat", "en": "cat", "cat": "natuur_planten_dieren"}, {"pt": "pássaro", "nl": "vogel", "en": "bird", "cat": "natuur_planten_dieren"}, {"pt": "cavalo", "nl": "paard", "en": "horse", "cat": "natuur_planten_dieren"}, {"pt": "vaca", "nl": "koe", "en": "cow", "cat": "natuur_planten_dieren"}, {"pt": "floresta", "nl": "bos", "en": "forest", "cat": "natuur_planten_dieren"}, {"pt": "ilha", "nl": "eiland", "en": "island", "cat": "natuur_planten_dieren"}, {"pt": "pedra", "nl": "steen", "en": "stone", "cat": "natuur_planten_dieren"}, {"pt": "futebol", "nl": "voetbal", "en": "football", "cat": "sport_vrije_tijd"}, {"pt": "música", "nl": "muziek", "en": "music", "cat": "sport_vrije_tijd"}, {"pt": "filme", "nl": "film", "en": "movie", "cat": "sport_vrije_tijd"}, {"pt": "livro", "nl": "boek", "en": "book", "cat": "sport_vrije_tijd"}, {"pt": "jogo", "nl": "spel", "en": "game", "cat": "sport_vrije_tijd"}, {"pt": "dança", "nl": "dans", "en": "dance", "cat": "sport_vrije_tijd"}, {"pt": "viagem", "nl": "reis", "en": "trip", "cat": "sport_vrije_tijd"}, {"pt": "férias", "nl": "vakantie", "en": "holiday", "cat": "sport_vrije_tijd"}, {"pt": "professor", "nl": "leraar", "en": "teacher", "cat": "beroepen"}, {"pt": "engenheiro", "nl": "ingenieur", "en": "engineer", "cat": "beroepen"}, {"pt": "advogado", "nl": "advocaat", "en": "lawyer", "cat": "beroepen"}, {"pt": "cozinheiro", "nl": "kok", "en": "cook", "cat": "beroepen"}, {"pt": "motorista", "nl": "chauffeur", "en": "chauffeur", "cat": "beroepen"}, {"pt": "enfermeiro", "nl": "verpleegkundige", "en": "nurse", "cat": "beroepen"}, {"pt": "estudante", "nl": "student", "en": "student", "cat": "beroepen"}, {"pt": "médico", "nl": "dokter", "en": "doctor", "cat": "beroepen"}, {"pt": "precisar", "nl": "nodig hebben", "en": "to need", "cat": "werkwoorden_dagelijks"}, {"pt": "tentar", "nl": "proberen", "en": "to try", "cat": "werkwoorden_dagelijks"}, {"pt": "conseguir", "nl": "lukken/slagen", "en": "to manage/succeed", "cat": "werkwoorden_dagelijks"}, {"pt": "acontecer", "nl": "gebeuren", "en": "to happen", "cat": "werkwoorden_mentaal"}, {"pt": "sentir", "nl": "voelen", "en": "to feel", "cat": "werkwoorden_mentaal"}, {"pt": "sonhar", "nl": "dromen", "en": "to dream", "cat": "werkwoorden_mentaal"}, {"pt": "chamar", "nl": "noemen/roepen", "en": "to call", "cat": "werkwoorden_communicatie"}, {"pt": "bastante", "nl": "vrij veel", "en": "quite a lot", "cat": "hoeveelheid"}, {"pt": "demasiado", "nl": "te veel", "en": "too much", "cat": "hoeveelheid"}, {"pt": "cortina", "nl": "gordijn", "en": "curtain", "cat": "huis_meubels"}, {"pt": "aquecedor", "nl": "verwarmingstoestel", "en": "heater", "cat": "huis_meubels"}, {"pt": "cinema", "nl": "bioscoop", "en": "cinema", "cat": "buurt_stad"}, {"pt": "ginásio", "nl": "sportschool", "en": "gym", "cat": "buurt_stad"}, {"pt": "mota", "nl": "motor (voertuig)", "en": "motorbike", "cat": "vervoer"}, {"pt": "camião", "nl": "vrachtwagen", "en": "truck", "cat": "vervoer"}, {"pt": "pele", "nl": "huid", "en": "skin", "cat": "lichaam"}, {"pt": "unha", "nl": "nagel", "en": "nail", "cat": "lichaam"}, {"pt": "ombro", "nl": "schouder", "en": "shoulder", "cat": "lichaam"}, {"pt": "joelho", "nl": "knie", "en": "knee", "cat": "lichaam"}, {"pt": "calmo", "nl": "rustig", "en": "calm", "cat": "emoties"}, {"pt": "confuso", "nl": "verward", "en": "confused", "cat": "emoties"}, {"pt": "simples", "nl": "simpel", "en": "simple", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "complicado", "nl": "gecompliceerd", "en": "complicated", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "seguro", "nl": "veilig", "en": "safe", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "perigoso", "nl": "gevaarlijk", "en": "dangerous", "cat": "bijvoeglijk_kwaliteit"}, {"pt": "coelho", "nl": "konijn", "en": "rabbit", "cat": "natuur_planten_dieren"}, {"pt": "leão", "nl": "leeuw", "en": "lion", "cat": "natuur_planten_dieren"}, {"pt": "desporto", "nl": "sport", "en": "sport", "cat": "sport_vrije_tijd"}, {"pt": "pintura", "nl": "schilderkunst", "en": "painting", "cat": "sport_vrije_tijd"}, {"pt": "artista", "nl": "kunstenaar", "en": "artist", "cat": "beroepen"}, {"pt": "escritor", "nl": "schrijver", "en": "writer", "cat": "beroepen"}, {"pt": "onze", "nl": "elf", "en": "eleven", "cat": "getallen_kardinaal"}, {"pt": "doze", "nl": "twaalf", "en": "twelve", "cat": "getallen_kardinaal"}, {"pt": "trinta", "nl": "dertig", "en": "thirty", "cat": "getallen_kardinaal"}, {"pt": "quarenta", "nl": "veertig", "en": "forty", "cat": "getallen_kardinaal"}, {"pt": "cinquenta", "nl": "vijftig", "en": "fifty", "cat": "getallen_kardinaal"}, {"pt": "senha", "nl": "wachtwoord", "en": "password", "cat": "technologie"}, {"pt": "carregador", "nl": "oplader", "en": "charger", "cat": "technologie"}, {"pt": "massa", "nl": "pasta", "en": "pasta", "cat": "voedsel"}, {"pt": "sobrancelha", "nl": "wenkbrauw", "en": "eyebrow", "cat": "lichaam"}, {"pt": "bigode", "nl": "snor", "en": "moustache", "cat": "lichaam"}, {"pt": "piscina", "nl": "zwembad", "en": "swimming pool", "cat": "sport_vrije_tijd"}, {"pt": "bilhete de identidade", "nl": "identiteitskaart", "en": "ID card", "cat": "stad_documenten"}, {"pt": "passaporte", "nl": "paspoort", "en": "passport", "cat": "stad_documenten"}, {"pt": "cartão de cidadão", "nl": "identiteitskaart (PT)", "en": "citizen card", "cat": "stad_documenten"}, {"pt": "seguro (substantivo)", "nl": "verzekering", "en": "insurance", "cat": "stad_documenten"}];
+const WORD_BANK_ETEN = [{"pt": "cenoura", "nl": "wortel", "en": "carrot", "cat": "groenten"}, {"pt": "cebola", "nl": "ui", "en": "onion", "cat": "groenten"}, {"pt": "alho", "nl": "knoflook", "en": "garlic", "cat": "groenten"}, {"pt": "batata", "nl": "aardappel", "en": "potato", "cat": "groenten"}, {"pt": "tomate", "nl": "tomaat", "en": "tomato", "cat": "groenten"}, {"pt": "pepino", "nl": "komkommer", "en": "cucumber", "cat": "groenten"}, {"pt": "alface", "nl": "sla", "en": "lettuce", "cat": "groenten"}, {"pt": "brócolos", "nl": "broccoli", "en": "broccoli", "cat": "groenten"}, {"pt": "courgette", "nl": "courgette", "en": "zucchini", "cat": "groenten"}, {"pt": "pimento", "nl": "paprika", "en": "bell pepper", "cat": "groenten"}, {"pt": "cogumelo", "nl": "paddenstoel", "en": "mushroom", "cat": "groenten"}, {"pt": "feijão verde", "nl": "sperzieboon", "en": "green bean", "cat": "groenten"}, {"pt": "ervilhas", "nl": "erwten", "en": "peas", "cat": "groenten"}, {"pt": "espinafres", "nl": "spinazie", "en": "spinach", "cat": "groenten"}, {"pt": "aipo", "nl": "selderij", "en": "celery", "cat": "groenten"}, {"pt": "beterraba", "nl": "rode biet", "en": "beetroot", "cat": "groenten"}, {"pt": "abóbora", "nl": "pompoen", "en": "pumpkin", "cat": "groenten"}, {"pt": "nabo", "nl": "raap", "en": "turnip", "cat": "groenten"}, {"pt": "rabanete", "nl": "radijs", "en": "radish", "cat": "groenten"}, {"pt": "alho-francês", "nl": "prei", "en": "leek", "cat": "groenten"}, {"pt": "couve", "nl": "kool", "en": "cabbage", "cat": "groenten"}, {"pt": "couve-flor", "nl": "bloemkool", "en": "cauliflower", "cat": "groenten"}, {"pt": "milho", "nl": "maïs", "en": "corn", "cat": "groenten"}, {"pt": "azeitona", "nl": "olijf", "en": "olive", "cat": "groenten"}, {"pt": "espargos", "nl": "asperges", "en": "asparagus", "cat": "groenten"}, {"pt": "maçã", "nl": "appel", "en": "apple", "cat": "fruta"}, {"pt": "laranja", "nl": "sinaasappel", "en": "orange", "cat": "fruta"}, {"pt": "banana", "nl": "banaan", "en": "banana", "cat": "fruta"}, {"pt": "uva", "nl": "druif", "en": "grape", "cat": "fruta"}, {"pt": "morango", "nl": "aardbei", "en": "strawberry", "cat": "fruta"}, {"pt": "pêssego", "nl": "perzik", "en": "peach", "cat": "fruta"}, {"pt": "ananás", "nl": "ananas", "en": "pineapple", "cat": "fruta"}, {"pt": "melancia", "nl": "watermeloen", "en": "watermelon", "cat": "fruta"}, {"pt": "pera", "nl": "peer", "en": "pear", "cat": "fruta"}, {"pt": "limão", "nl": "citroen", "en": "lemon", "cat": "fruta"}, {"pt": "manga", "nl": "mango", "en": "mango", "cat": "fruta"}, {"pt": "kiwi", "nl": "kiwi", "en": "kiwi", "cat": "fruta"}, {"pt": "amora", "nl": "braam", "en": "blackberry", "cat": "fruta"}, {"pt": "framboesa", "nl": "framboos", "en": "raspberry", "cat": "fruta"}, {"pt": "cereja", "nl": "kers", "en": "cherry", "cat": "fruta"}, {"pt": "figo", "nl": "vijg", "en": "fig", "cat": "fruta"}, {"pt": "tâmara", "nl": "dadel", "en": "date", "cat": "fruta"}, {"pt": "romã", "nl": "granaatappel", "en": "pomegranate", "cat": "fruta"}, {"pt": "maracujá", "nl": "passievrucht", "en": "passion fruit", "cat": "fruta"}, {"pt": "coco", "nl": "kokosnoot", "en": "coconut", "cat": "fruta"}, {"pt": "meloa", "nl": "meloen", "en": "melon", "cat": "fruta"}, {"pt": "nectarina", "nl": "nectarine", "en": "nectarine", "cat": "fruta"}, {"pt": "damasco", "nl": "abrikoos", "en": "apricot", "cat": "fruta"}, {"pt": "ameixa", "nl": "pruim", "en": "plum", "cat": "fruta"}, {"pt": "frango", "nl": "kip", "en": "chicken", "cat": "carne_peixe"}, {"pt": "carne de vaca", "nl": "rundvlees", "en": "beef", "cat": "carne_peixe"}, {"pt": "porco", "nl": "varkensvlees", "en": "pork", "cat": "carne_peixe"}, {"pt": "peru", "nl": "kalkoen", "en": "turkey", "cat": "carne_peixe"}, {"pt": "bife", "nl": "biefstuk", "en": "steak", "cat": "carne_peixe"}, {"pt": "fiambre", "nl": "gekookte ham", "en": "ham", "cat": "carne_peixe"}, {"pt": "salsicha", "nl": "worstje", "en": "sausage", "cat": "carne_peixe"}, {"pt": "camarão", "nl": "garnaal", "en": "shrimp", "cat": "carne_peixe"}, {"pt": "salmão", "nl": "zalm", "en": "salmon", "cat": "carne_peixe"}, {"pt": "atum", "nl": "tonijn", "en": "tuna", "cat": "carne_peixe"}, {"pt": "bacalhau", "nl": "kabeljauw/stokvis", "en": "cod", "cat": "carne_peixe"}, {"pt": "marisco", "nl": "schaal- en schelpdieren", "en": "seafood", "cat": "carne_peixe"}, {"pt": "lula", "nl": "inktvis", "en": "squid", "cat": "carne_peixe"}, {"pt": "polvo", "nl": "octopus", "en": "octopus", "cat": "carne_peixe"}, {"pt": "sardinha", "nl": "sardine", "en": "sardine", "cat": "carne_peixe"}, {"pt": "robalo", "nl": "zeebaars", "en": "sea bass", "cat": "carne_peixe"}, {"pt": "dourada", "nl": "goudbrasem", "en": "sea bream", "cat": "carne_peixe"}, {"pt": "amêijoas", "nl": "kokkels", "en": "clams", "cat": "carne_peixe"}, {"pt": "mexilhões", "nl": "mosselen", "en": "mussels", "cat": "carne_peixe"}, {"pt": "lagosta", "nl": "kreeft", "en": "lobster", "cat": "carne_peixe"}, {"pt": "caranguejo", "nl": "krab", "en": "crab", "cat": "carne_peixe"}, {"pt": "costeleta", "nl": "karbonade", "en": "chop", "cat": "carne_peixe"}, {"pt": "peito de frango", "nl": "kipfilet", "en": "chicken breast", "cat": "carne_peixe"}, {"pt": "carne picada", "nl": "gehakt", "en": "minced meat", "cat": "carne_peixe"}, {"pt": "borrego", "nl": "lamsvlees", "en": "lamb", "cat": "carne_peixe"}, {"pt": "leite", "nl": "melk", "en": "milk", "cat": "laticinios"}, {"pt": "queijo", "nl": "kaas", "en": "cheese", "cat": "laticinios"}, {"pt": "iogurte", "nl": "yoghurt", "en": "yoghurt", "cat": "laticinios"}, {"pt": "manteiga", "nl": "boter", "en": "butter", "cat": "laticinios"}, {"pt": "natas", "nl": "slagroom", "en": "cream", "cat": "laticinios"}, {"pt": "ovos", "nl": "eieren", "en": "eggs", "cat": "laticinios"}, {"pt": "requeijão", "nl": "romige kwarkkaas", "en": "curd cheese", "cat": "laticinios"}, {"pt": "queijo fresco", "nl": "verse kaas", "en": "fresh cheese", "cat": "laticinios"}, {"pt": "queijo da serra", "nl": "schapenkaas uit de Serra", "en": "serra cheese", "cat": "laticinios"}, {"pt": "leite meio-gordo", "nl": "halfvolle melk", "en": "semi-skimmed milk", "cat": "laticinios"}, {"pt": "leite magro", "nl": "magere melk", "en": "skimmed milk", "cat": "laticinios"}, {"pt": "queijo curado", "nl": "belegen kaas", "en": "cured cheese", "cat": "laticinios"}, {"pt": "leite em pó", "nl": "melkpoeder", "en": "powdered milk", "cat": "laticinios"}, {"pt": "nata para bater", "nl": "slagroom om te kloppen", "en": "whipping cream", "cat": "laticinios"}, {"pt": "pão", "nl": "brood", "en": "bread", "cat": "pao_gebak"}, {"pt": "pão de forma", "nl": "toastbrood", "en": "sliced bread", "cat": "pao_gebak"}, {"pt": "croissant", "nl": "croissant", "en": "croissant", "cat": "pao_gebak"}, {"pt": "bolo", "nl": "taart", "en": "cake", "cat": "pao_gebak"}, {"pt": "bolachas", "nl": "koekjes", "en": "biscuits", "cat": "pao_gebak"}, {"pt": "broa", "nl": "maïsbrood", "en": "corn bread", "cat": "pao_gebak"}, {"pt": "sandes", "nl": "broodje/sandwich", "en": "sandwich", "cat": "pao_gebak"}, {"pt": "pastel de nata", "nl": "Portugese custardtaart", "en": "custard tart", "cat": "pao_gebak"}, {"pt": "bolo de arroz", "nl": "rijstcakeje", "en": "rice cake", "cat": "pao_gebak"}, {"pt": "pão de ló", "nl": "luchtige cake", "en": "sponge cake", "cat": "pao_gebak"}, {"pt": "arroz doce", "nl": "rijstepap", "en": "sweet rice pudding", "cat": "pao_gebak"}, {"pt": "leite-creme", "nl": "Portugese crème brûlée", "en": "Portuguese crème brûlée", "cat": "pao_gebak"}, {"pt": "queque", "nl": "muffin", "en": "muffin", "cat": "pao_gebak"}, {"pt": "torrada", "nl": "toast", "en": "toast", "cat": "pao_gebak"}, {"pt": "pão integral", "nl": "volkorenbrood", "en": "wholemeal bread", "cat": "pao_gebak"}, {"pt": "água", "nl": "water", "en": "water", "cat": "dranken_non_alcoholisch"}, {"pt": "sumo", "nl": "sap", "en": "juice", "cat": "dranken_non_alcoholisch"}, {"pt": "refrigerante", "nl": "frisdrank", "en": "soft drink", "cat": "dranken_non_alcoholisch"}, {"pt": "chá", "nl": "thee", "en": "tea", "cat": "dranken_non_alcoholisch"}, {"pt": "café", "nl": "koffie", "en": "coffee", "cat": "dranken_non_alcoholisch"}, {"pt": "água com gás", "nl": "bruisend water", "en": "sparkling water", "cat": "dranken_non_alcoholisch"}, {"pt": "limonada", "nl": "limonade", "en": "lemonade", "cat": "dranken_non_alcoholisch"}, {"pt": "chá preto", "nl": "zwarte thee", "en": "black tea", "cat": "dranken_non_alcoholisch"}, {"pt": "chá verde", "nl": "groene thee", "en": "green tea", "cat": "dranken_non_alcoholisch"}, {"pt": "café com leite", "nl": "koffie met melk", "en": "coffee with milk", "cat": "dranken_non_alcoholisch"}, {"pt": "galão", "nl": "koffie met veel melk", "en": "milky coffee (PT style)", "cat": "dranken_non_alcoholisch"}, {"pt": "bica", "nl": "espresso", "en": "espresso (PT style)", "cat": "dranken_non_alcoholisch"}, {"pt": "água mineral", "nl": "mineraalwater", "en": "mineral water", "cat": "dranken_non_alcoholisch"}, {"pt": "batido", "nl": "milkshake", "en": "milkshake", "cat": "dranken_non_alcoholisch"}, {"pt": "néctar", "nl": "nectar", "en": "nectar", "cat": "dranken_non_alcoholisch"}, {"pt": "vinho", "nl": "wijn", "en": "wine", "cat": "dranken_alcoholisch"}, {"pt": "cerveja", "nl": "bier", "en": "beer", "cat": "dranken_alcoholisch"}, {"pt": "whisky", "nl": "whisky", "en": "whisky", "cat": "dranken_alcoholisch"}, {"pt": "vodka", "nl": "wodka", "en": "vodka", "cat": "dranken_alcoholisch"}, {"pt": "champanhe", "nl": "champagne", "en": "champagne", "cat": "dranken_alcoholisch"}, {"pt": "sidra", "nl": "cider", "en": "cider", "cat": "dranken_alcoholisch"}, {"pt": "vinho tinto", "nl": "rode wijn", "en": "red wine", "cat": "dranken_alcoholisch"}, {"pt": "vinho branco", "nl": "witte wijn", "en": "white wine", "cat": "dranken_alcoholisch"}, {"pt": "vinho verde", "nl": "Portugese groene wijn", "en": "vinho verde", "cat": "dranken_alcoholisch"}, {"pt": "ginjinha", "nl": "Portugese kersenlikeur", "en": "cherry liqueur", "cat": "dranken_alcoholisch"}, {"pt": "licor", "nl": "likeur", "en": "liqueur", "cat": "dranken_alcoholisch"}, {"pt": "aguardente", "nl": "brandewijn", "en": "brandy", "cat": "dranken_alcoholisch"}, {"pt": "vinho do Porto", "nl": "portwijn", "en": "port wine", "cat": "dranken_alcoholisch"}, {"pt": "espumante", "nl": "mousserende wijn", "en": "sparkling wine", "cat": "dranken_alcoholisch"}, {"pt": "sal", "nl": "zout", "en": "salt", "cat": "condimentos_especiarias"}, {"pt": "pimenta", "nl": "peper", "en": "pepper", "cat": "condimentos_especiarias"}, {"pt": "açúcar", "nl": "suiker", "en": "sugar", "cat": "condimentos_especiarias"}, {"pt": "azeite", "nl": "olijfolie", "en": "olive oil", "cat": "condimentos_especiarias"}, {"pt": "vinagre", "nl": "azijn", "en": "vinegar", "cat": "condimentos_especiarias"}, {"pt": "mel", "nl": "honing", "en": "honey", "cat": "condimentos_especiarias"}, {"pt": "mostarda", "nl": "mosterd", "en": "mustard", "cat": "condimentos_especiarias"}, {"pt": "ketchup", "nl": "ketchup", "en": "ketchup", "cat": "condimentos_especiarias"}, {"pt": "maionese", "nl": "mayonaise", "en": "mayonnaise", "cat": "condimentos_especiarias"}, {"pt": "canela", "nl": "kaneel", "en": "cinnamon", "cat": "condimentos_especiarias"}, {"pt": "orégãos", "nl": "oregano", "en": "oregano", "cat": "condimentos_especiarias"}, {"pt": "manjericão", "nl": "basilicum", "en": "basil", "cat": "condimentos_especiarias"}, {"pt": "coentros", "nl": "koriander", "en": "coriander", "cat": "condimentos_especiarias"}, {"pt": "salsa", "nl": "peterselie", "en": "parsley", "cat": "condimentos_especiarias"}, {"pt": "tomilho", "nl": "tijm", "en": "thyme", "cat": "condimentos_especiarias"}, {"pt": "alecrim", "nl": "rozemarijn", "en": "rosemary", "cat": "condimentos_especiarias"}, {"pt": "hortelã", "nl": "munt", "en": "mint", "cat": "condimentos_especiarias"}, {"pt": "louro", "nl": "laurier", "en": "bay leaf", "cat": "condimentos_especiarias"}, {"pt": "cominho", "nl": "komijn", "en": "cumin", "cat": "condimentos_especiarias"}, {"pt": "noz-moscada", "nl": "nootmuskaat", "en": "nutmeg", "cat": "condimentos_especiarias"}, {"pt": "colorau", "nl": "paprikapoeder", "en": "paprika powder", "cat": "condimentos_especiarias"}, {"pt": "açafrão", "nl": "saffraan", "en": "saffron", "cat": "condimentos_especiarias"}, {"pt": "gengibre", "nl": "gember", "en": "ginger", "cat": "condimentos_especiarias"}, {"pt": "cravinho", "nl": "kruidnagel", "en": "clove", "cat": "condimentos_especiarias"}, {"pt": "cozinhar", "nl": "koken", "en": "to cook", "cat": "keuken_bereiding"}, {"pt": "fritar", "nl": "bakken/frituren", "en": "to fry", "cat": "keuken_bereiding"}, {"pt": "assar", "nl": "roosteren/bakken in oven", "en": "to roast/bake", "cat": "keuken_bereiding"}, {"pt": "grelhar", "nl": "grillen", "en": "to grill", "cat": "keuken_bereiding"}, {"pt": "ferver", "nl": "koken (water)", "en": "to boil", "cat": "keuken_bereiding"}, {"pt": "misturar", "nl": "mengen", "en": "to mix", "cat": "keuken_bereiding"}, {"pt": "cortar", "nl": "snijden", "en": "to cut", "cat": "keuken_bereiding"}, {"pt": "descascar", "nl": "schillen", "en": "to peel", "cat": "keuken_bereiding"}, {"pt": "temperar", "nl": "kruiden", "en": "to season", "cat": "keuken_bereiding"}, {"pt": "receita", "nl": "recept", "en": "recipe", "cat": "keuken_bereiding"}, {"pt": "descongelar", "nl": "ontdooien", "en": "to defrost", "cat": "keuken_bereiding"}, {"pt": "aquecer", "nl": "opwarmen", "en": "to heat up", "cat": "keuken_bereiding"}, {"pt": "arrefecer", "nl": "afkoelen", "en": "to cool down", "cat": "keuken_bereiding"}, {"pt": "bater", "nl": "kloppen", "en": "to whisk", "cat": "keuken_bereiding"}, {"pt": "amassar", "nl": "kneden", "en": "to knead", "cat": "keuken_bereiding"}, {"pt": "polvilhar", "nl": "bestrooien", "en": "to sprinkle", "cat": "keuken_bereiding"}, {"pt": "regar", "nl": "besprenkelen", "en": "to drizzle", "cat": "keuken_bereiding"}, {"pt": "escorrer", "nl": "afgieten", "en": "to drain", "cat": "keuken_bereiding"}, {"pt": "marinar", "nl": "marineren", "en": "to marinate", "cat": "keuken_bereiding"}, {"pt": "ralar", "nl": "raspen", "en": "to grate", "cat": "keuken_bereiding"}, {"pt": "picar", "nl": "fijnhakken", "en": "to chop", "cat": "keuken_bereiding"}, {"pt": "envolver", "nl": "vouwen (in beslag)", "en": "to fold in", "cat": "keuken_bereiding"}, {"pt": "doce", "nl": "zoet", "en": "sweet", "cat": "smaken_texturen"}, {"pt": "salgado", "nl": "zout/hartig", "en": "salty", "cat": "smaken_texturen"}, {"pt": "azedo", "nl": "zuur", "en": "sour", "cat": "smaken_texturen"}, {"pt": "amargo", "nl": "bitter", "en": "bitter", "cat": "smaken_texturen"}, {"pt": "picante", "nl": "pittig", "en": "spicy", "cat": "smaken_texturen"}, {"pt": "fresco", "nl": "vers", "en": "fresh", "cat": "smaken_texturen"}, {"pt": "crocante", "nl": "knapperig", "en": "crunchy", "cat": "smaken_texturen"}, {"pt": "macio", "nl": "zacht", "en": "soft", "cat": "smaken_texturen"}, {"pt": "insosso", "nl": "smakeloos", "en": "bland", "cat": "smaken_texturen"}, {"pt": "suculento", "nl": "sappig", "en": "juicy", "cat": "smaken_texturen"}, {"pt": "estragado", "nl": "bedorven", "en": "spoiled", "cat": "smaken_texturen"}, {"pt": "cremoso", "nl": "romig", "en": "creamy", "cat": "smaken_texturen"}, {"pt": "seco", "nl": "droog", "en": "dry", "cat": "smaken_texturen"}, {"pt": "líquido", "nl": "vloeibaar", "en": "liquid", "cat": "smaken_texturen"}, {"pt": "restaurante", "nl": "restaurant", "en": "restaurant", "cat": "restaurant_algemeen"}, {"pt": "menu", "nl": "menu", "en": "menu", "cat": "restaurant_algemeen"}, {"pt": "ementa", "nl": "menukaart", "en": "menu card", "cat": "restaurant_algemeen"}, {"pt": "mesa", "nl": "tafel", "en": "table", "cat": "restaurant_algemeen"}, {"pt": "reserva", "nl": "reservering", "en": "reservation", "cat": "restaurant_algemeen"}, {"pt": "empregado de mesa", "nl": "ober", "en": "waiter", "cat": "restaurant_algemeen"}, {"pt": "conta", "nl": "rekening", "en": "bill", "cat": "restaurant_algemeen"}, {"pt": "gorjeta", "nl": "fooi", "en": "tip", "cat": "restaurant_algemeen"}, {"pt": "entrada", "nl": "voorgerecht", "en": "starter", "cat": "restaurant_algemeen"}, {"pt": "prato principal", "nl": "hoofdgerecht", "en": "main course", "cat": "restaurant_algemeen"}, {"pt": "sobremesa", "nl": "toetje", "en": "dessert", "cat": "restaurant_algemeen"}, {"pt": "take-away", "nl": "afhalen", "en": "takeaway", "cat": "restaurant_algemeen"}, {"pt": "reservar", "nl": "reserveren", "en": "to reserve", "cat": "restaurant_algemeen"}, {"pt": "pedir", "nl": "bestellen", "en": "to order", "cat": "restaurant_algemeen"}, {"pt": "servir", "nl": "serveren", "en": "to serve", "cat": "restaurant_algemeen"}, {"pt": "couvert", "nl": "couvert", "en": "cover charge", "cat": "restaurant_algemeen"}, {"pt": "fatura", "nl": "factuur", "en": "invoice", "cat": "restaurant_algemeen"}, {"pt": "reclamação", "nl": "klacht", "en": "complaint", "cat": "restaurant_algemeen"}, {"pt": "chef de cozinha", "nl": "chef-kok", "en": "head chef", "cat": "restaurant_algemeen"}, {"pt": "sommelier", "nl": "sommelier", "en": "sommelier", "cat": "restaurant_algemeen"}, {"pt": "menu do dia", "nl": "dagmenu", "en": "menu of the day", "cat": "restaurant_algemeen"}, {"pt": "buffet", "nl": "buffet", "en": "buffet", "cat": "restaurant_algemeen"}, {"pt": "anfitriã", "nl": "gastvrouw", "en": "hostess", "cat": "restaurant_algemeen"}, {"pt": "esplanada", "nl": "terras", "en": "terrace", "cat": "restaurant_algemeen"}, {"pt": "sala de jantar", "nl": "eetzaal", "en": "dining room", "cat": "restaurant_algemeen"}, {"pt": "a conta, por favor", "nl": "de rekening, alstublieft", "en": "the bill, please", "cat": "handige_zinnen"}, {"pt": "queria...", "nl": "ik zou graag willen...", "en": "I would like...", "cat": "handige_zinnen"}, {"pt": "sem gelo", "nl": "zonder ijs", "en": "without ice", "cat": "handige_zinnen"}, {"pt": "para aqui ou para levar", "nl": "hier eten of meenemen", "en": "for here or to go", "cat": "handige_zinnen"}, {"pt": "estou só a ver", "nl": "ik kijk alleen even", "en": "I'm just looking", "cat": "handige_zinnen"}, {"pt": "bom apetite", "nl": "eet smakelijk", "en": "enjoy your meal", "cat": "handige_zinnen"}, {"pt": "uma mesa para dois", "nl": "een tafel voor twee", "en": "a table for two", "cat": "handige_zinnen"}, {"pt": "tem vegetariano?", "nl": "heeft u vegetarisch?", "en": "do you have vegetarian?", "cat": "handige_zinnen"}, {"pt": "está tudo bem?", "nl": "is alles goed?", "en": "is everything alright?", "cat": "handige_zinnen"}, {"pt": "pode trazer mais água?", "nl": "kunt u meer water brengen?", "en": "can you bring more water?", "cat": "handige_zinnen"}, {"pt": "aceita cartão?", "nl": "accepteert u kaart?", "en": "do you accept card?", "cat": "handige_zinnen"}, {"pt": "onde é a casa de banho?", "nl": "waar is het toilet?", "en": "where is the toilet?", "cat": "handige_zinnen"}, {"pt": "estava delicioso", "nl": "het was heerlijk", "en": "it was delicious", "cat": "handige_zinnen"}, {"pt": "posso ver a ementa?", "nl": "mag ik de menukaart zien?", "en": "may I see the menu?", "cat": "handige_zinnen"}, {"pt": "a que horas fecham?", "nl": "hoe laat sluiten jullie?", "en": "what time do you close?", "cat": "handige_zinnen"}, {"pt": "tem wifi?", "nl": "hebben jullie wifi?", "en": "do you have wifi?", "cat": "handige_zinnen"}, {"pt": "supermercado", "nl": "supermarkt", "en": "supermarket", "cat": "boodschappen_winkel"}, {"pt": "talho", "nl": "slagerij", "en": "butcher's", "cat": "boodschappen_winkel"}, {"pt": "peixaria", "nl": "viswinkel", "en": "fishmonger's", "cat": "boodschappen_winkel"}, {"pt": "padaria", "nl": "bakkerij", "en": "bakery", "cat": "boodschappen_winkel"}, {"pt": "mercearia", "nl": "kruidenierswinkel", "en": "grocery store", "cat": "boodschappen_winkel"}, {"pt": "pastelaria", "nl": "banketbakkerij", "en": "pastry shop", "cat": "boodschappen_winkel"}, {"pt": "caixa", "nl": "kassa", "en": "checkout", "cat": "boodschappen_winkel"}, {"pt": "saco", "nl": "tas", "en": "bag", "cat": "boodschappen_winkel"}, {"pt": "carrinho", "nl": "winkelwagentje", "en": "shopping cart", "cat": "boodschappen_winkel"}, {"pt": "cesto", "nl": "winkelmandje", "en": "shopping basket", "cat": "boodschappen_winkel"}, {"pt": "prateleira", "nl": "schap", "en": "shelf", "cat": "boodschappen_winkel"}, {"pt": "desconto", "nl": "korting", "en": "discount", "cat": "boodschappen_winkel"}, {"pt": "promoção", "nl": "aanbieding", "en": "special offer", "cat": "boodschappen_winkel"}, {"pt": "recibo", "nl": "kassabon", "en": "receipt", "cat": "boodschappen_winkel"}, {"pt": "embalagem", "nl": "verpakking", "en": "packaging", "cat": "boodschappen_winkel"}, {"pt": "fila", "nl": "rij", "en": "queue", "cat": "boodschappen_winkel"}, {"pt": "troco", "nl": "wisselgeld", "en": "change", "cat": "boodschappen_winkel"}, {"pt": "preço", "nl": "prijs", "en": "price", "cat": "boodschappen_winkel"}, {"pt": "etiqueta", "nl": "prijskaartje", "en": "price tag", "cat": "boodschappen_winkel"}, {"pt": "código de barras", "nl": "streepjescode", "en": "barcode", "cat": "boodschappen_winkel"}, {"pt": "validade", "nl": "houdbaarheidsdatum", "en": "expiry date", "cat": "boodschappen_winkel"}, {"pt": "marca", "nl": "merk", "en": "brand", "cat": "boodschappen_winkel"}, {"pt": "produto", "nl": "product", "en": "product", "cat": "boodschappen_winkel"}, {"pt": "quantidade", "nl": "hoeveelheid", "en": "quantity", "cat": "boodschappen_winkel"}, {"pt": "unidade", "nl": "stuk/eenheid", "en": "unit", "cat": "boodschappen_winkel"}, {"pt": "oferta", "nl": "gratis cadeau", "en": "free gift", "cat": "boodschappen_winkel"}, {"pt": "saldo", "nl": "uitverkoop", "en": "sale", "cat": "boodschappen_winkel"}, {"pt": "reembolso", "nl": "terugbetaling", "en": "refund", "cat": "boodschappen_winkel"}, {"pt": "devolução", "nl": "retour", "en": "return", "cat": "boodschappen_winkel"}, {"pt": "funcionário", "nl": "medewerker", "en": "employee", "cat": "boodschappen_winkel"}, {"pt": "horário de funcionamento", "nl": "openingstijden", "en": "opening hours", "cat": "boodschappen_winkel"}, {"pt": "caixa automática", "nl": "zelfscankassa", "en": "self-checkout", "cat": "boodschappen_winkel"}, {"pt": "cartão de fidelidade", "nl": "klantenkaart", "en": "loyalty card", "cat": "boodschappen_winkel"}, {"pt": "lista de compras", "nl": "boodschappenlijst", "en": "shopping list", "cat": "boodschappen_winkel"}, {"pt": "prato", "nl": "bord", "en": "plate", "cat": "keukengerei_tafel"}, {"pt": "copo", "nl": "glas", "en": "glass", "cat": "keukengerei_tafel"}, {"pt": "garfo", "nl": "vork", "en": "fork", "cat": "keukengerei_tafel"}, {"pt": "faca", "nl": "mes", "en": "knife", "cat": "keukengerei_tafel"}, {"pt": "colher", "nl": "lepel", "en": "spoon", "cat": "keukengerei_tafel"}, {"pt": "guardanapo", "nl": "servet", "en": "napkin", "cat": "keukengerei_tafel"}, {"pt": "toalha de mesa", "nl": "tafelkleed", "en": "tablecloth", "cat": "keukengerei_tafel"}, {"pt": "tábua de cortar", "nl": "snijplank", "en": "cutting board", "cat": "keukengerei_tafel"}, {"pt": "ralador", "nl": "rasp", "en": "grater", "cat": "keukengerei_tafel"}, {"pt": "escorredor", "nl": "vergiet", "en": "colander", "cat": "keukengerei_tafel"}, {"pt": "abre-latas", "nl": "blikopener", "en": "can opener", "cat": "keukengerei_tafel"}, {"pt": "saca-rolhas", "nl": "kurkentrekker", "en": "corkscrew", "cat": "keukengerei_tafel"}, {"pt": "tigela", "nl": "kom", "en": "bowl", "cat": "keukengerei_tafel"}, {"pt": "frigideira", "nl": "koekenpan", "en": "frying pan", "cat": "keukengerei_tafel"}, {"pt": "tacho", "nl": "kookpan", "en": "pot", "cat": "keukengerei_tafel"}, {"pt": "espátula", "nl": "spatel", "en": "spatula", "cat": "keukengerei_tafel"}, {"pt": "avental", "nl": "schort", "en": "apron", "cat": "keukengerei_tafel"}, {"pt": "micro-ondas", "nl": "magnetron", "en": "microwave", "cat": "keuken_apparaten"}, {"pt": "torradeira", "nl": "broodrooster", "en": "toaster", "cat": "keuken_apparaten"}, {"pt": "chaleira", "nl": "waterkoker", "en": "kettle", "cat": "keuken_apparaten"}, {"pt": "liquidificadora", "nl": "blender", "en": "blender", "cat": "keuken_apparaten"}, {"pt": "batedeira", "nl": "mixer", "en": "mixer", "cat": "keuken_apparaten"}, {"pt": "máquina de café", "nl": "koffiezetapparaat", "en": "coffee machine", "cat": "keuken_apparaten"}, {"pt": "fritadeira", "nl": "frituurpan/airfryer", "en": "deep fryer", "cat": "keuken_apparaten"}, {"pt": "exaustor", "nl": "afzuigkap", "en": "extractor hood", "cat": "keuken_apparaten"}, {"pt": "congelador", "nl": "vriezer", "en": "freezer", "cat": "keuken_apparaten"}, {"pt": "máquina de lavar loiça", "nl": "vaatwasmachine", "en": "dishwasher", "cat": "keuken_apparaten"}, {"pt": "arroz", "nl": "rijst", "en": "rice", "cat": "granen_peulvruchten"}, {"pt": "massa", "nl": "pasta", "en": "pasta", "cat": "granen_peulvruchten"}, {"pt": "lentilhas", "nl": "linzen", "en": "lentils", "cat": "granen_peulvruchten"}, {"pt": "grão-de-bico", "nl": "kikkererwten", "en": "chickpeas", "cat": "granen_peulvruchten"}, {"pt": "quinoa", "nl": "quinoa", "en": "quinoa", "cat": "granen_peulvruchten"}, {"pt": "aveia", "nl": "haver", "en": "oats", "cat": "granen_peulvruchten"}, {"pt": "farinha", "nl": "meel", "en": "flour", "cat": "granen_peulvruchten"}, {"pt": "feijão preto", "nl": "zwarte bonen", "en": "black beans", "cat": "granen_peulvruchten"}, {"pt": "cevada", "nl": "gerst", "en": "barley", "cat": "granen_peulvruchten"}, {"pt": "trigo", "nl": "tarwe", "en": "wheat", "cat": "granen_peulvruchten"}, {"pt": "vegetariano", "nl": "vegetarisch", "en": "vegetarian", "cat": "eetgewoontes_dieet"}, {"pt": "vegan", "nl": "veganistisch", "en": "vegan", "cat": "eetgewoontes_dieet"}, {"pt": "sem glúten", "nl": "glutenvrij", "en": "gluten-free", "cat": "eetgewoontes_dieet"}, {"pt": "alergia", "nl": "allergie", "en": "allergy", "cat": "eetgewoontes_dieet"}, {"pt": "biológico", "nl": "biologisch", "en": "organic", "cat": "eetgewoontes_dieet"}, {"pt": "light", "nl": "light/caloriearm", "en": "light/low-calorie", "cat": "eetgewoontes_dieet"}, {"pt": "intolerância", "nl": "intolerantie", "en": "intolerance", "cat": "eetgewoontes_dieet"}, {"pt": "caseiro", "nl": "zelfgemaakt", "en": "homemade", "cat": "eetgewoontes_dieet"}, {"pt": "quilo", "nl": "kilo", "en": "kilogram", "cat": "maten_verpakking"}, {"pt": "litro", "nl": "liter", "en": "litre", "cat": "maten_verpakking"}, {"pt": "grama", "nl": "gram", "en": "gram", "cat": "maten_verpakking"}, {"pt": "dúzia", "nl": "dozijn", "en": "dozen", "cat": "maten_verpakking"}, {"pt": "fatia", "nl": "plak", "en": "slice", "cat": "maten_verpakking"}, {"pt": "pedaço", "nl": "stuk", "en": "piece", "cat": "maten_verpakking"}, {"pt": "pacote", "nl": "pak", "en": "packet", "cat": "maten_verpakking"}, {"pt": "lata", "nl": "blik", "en": "can", "cat": "maten_verpakking"}, {"pt": "garrafa", "nl": "fles", "en": "bottle", "cat": "maten_verpakking"}, {"pt": "meia dúzia", "nl": "half dozijn", "en": "half a dozen", "cat": "maten_verpakking"}, {"pt": "provar", "nl": "proeven", "en": "to taste", "cat": "keuken_werkwoorden_extra"}, {"pt": "servir-se", "nl": "zichzelf bedienen", "en": "to help oneself", "cat": "keuken_werkwoorden_extra"}, {"pt": "partilhar", "nl": "delen", "en": "to share", "cat": "keuken_werkwoorden_extra"}, {"pt": "sobrar", "nl": "overblijven", "en": "to be left over", "cat": "keuken_werkwoorden_extra"}, {"pt": "desfrutar", "nl": "genieten", "en": "to enjoy", "cat": "keuken_werkwoorden_extra"}, {"pt": "saborear", "nl": "savoureren", "en": "to savour", "cat": "keuken_werkwoorden_extra"}, {"pt": "combinar", "nl": "combineren", "en": "to combine", "cat": "keuken_werkwoorden_extra"}, {"pt": "decorar", "nl": "versieren/garneren", "en": "to garnish", "cat": "keuken_werkwoorden_extra"}, {"pt": "embrulhar", "nl": "inpakken", "en": "to wrap", "cat": "keuken_werkwoorden_extra"}, {"pt": "acabar", "nl": "opeten/opmaken", "en": "to finish", "cat": "keuken_werkwoorden_extra"}, {"pt": "caloria", "nl": "calorie", "en": "calorie", "cat": "voedingswaarden"}, {"pt": "proteína", "nl": "eiwit", "en": "protein", "cat": "voedingswaarden"}, {"pt": "vitamina", "nl": "vitamine", "en": "vitamin", "cat": "voedingswaarden"}, {"pt": "fibra", "nl": "vezel", "en": "fibre", "cat": "voedingswaarden"}, {"pt": "gordura", "nl": "vet", "en": "fat", "cat": "voedingswaarden"}, {"pt": "hidratos de carbono", "nl": "koolhydraten", "en": "carbohydrates", "cat": "voedingswaarden"}, {"pt": "nutrição", "nl": "voeding", "en": "nutrition", "cat": "voedingswaarden"}, {"pt": "saudável", "nl": "gezond", "en": "healthy", "cat": "voedingswaarden"}, {"pt": "brunch", "nl": "brunch", "en": "brunch", "cat": "gelegenheden_maaltijden"}, {"pt": "piquenique", "nl": "picknick", "en": "picnic", "cat": "gelegenheden_maaltijden"}, {"pt": "churrasco", "nl": "barbecue", "en": "barbecue", "cat": "gelegenheden_maaltijden"}, {"pt": "banquete", "nl": "banket", "en": "banquet", "cat": "gelegenheden_maaltijden"}, {"pt": "aperitivo", "nl": "aperitief", "en": "aperitif", "cat": "gelegenheden_maaltijden"}, {"pt": "petisco", "nl": "hapje/snack", "en": "snack (PT style)", "cat": "gelegenheden_maaltijden"}, {"pt": "refeição", "nl": "maaltijd", "en": "meal", "cat": "gelegenheden_maaltijden"}, {"pt": "ceia", "nl": "laat avondmaal", "en": "late-night meal", "cat": "gelegenheden_maaltijden"}, {"pt": "despensa", "nl": "voorraadkast", "en": "pantry", "cat": "keuken_plekken"}, {"pt": "bancada", "nl": "aanrecht", "en": "kitchen counter", "cat": "keuken_plekken"}, {"pt": "lava-loiça", "nl": "gootsteen", "en": "kitchen sink", "cat": "keuken_plekken"}, {"pt": "armário de cozinha", "nl": "keukenkast", "en": "kitchen cupboard", "cat": "keuken_plekken"}, {"pt": "pizza", "nl": "pizza", "en": "pizza", "cat": "gerechten_wereldkeukens"}, {"pt": "hambúrguer", "nl": "hamburger", "en": "hamburger", "cat": "gerechten_wereldkeukens"}, {"pt": "sushi", "nl": "sushi", "en": "sushi", "cat": "gerechten_wereldkeukens"}, {"pt": "taco", "nl": "taco", "en": "taco", "cat": "gerechten_wereldkeukens"}, {"pt": "curry", "nl": "curry", "en": "curry", "cat": "gerechten_wereldkeukens"}, {"pt": "lasanha", "nl": "lasagne", "en": "lasagne", "cat": "gerechten_wereldkeukens"}, {"pt": "omelete", "nl": "omelet", "en": "omelette", "cat": "gerechten_wereldkeukens"}, {"pt": "hot dog", "nl": "hotdog", "en": "hot dog", "cat": "gerechten_wereldkeukens"}, {"pt": "sopa", "nl": "soep", "en": "soup", "cat": "gerechten_wereldkeukens"}, {"pt": "salada", "nl": "salade", "en": "salad", "cat": "gerechten_wereldkeukens"}, {"pt": "quiche", "nl": "quiche", "en": "quiche", "cat": "gerechten_wereldkeukens"}, {"pt": "sanduíche", "nl": "clubsandwich", "en": "club sandwich", "cat": "gerechten_wereldkeukens"}, {"pt": "cozer", "nl": "koken (pasta/rijst)", "en": "to boil (pasta/rice)", "cat": "keuken_bereiding_extra"}, {"pt": "empanar", "nl": "paneren", "en": "to bread", "cat": "keuken_bereiding_extra"}, {"pt": "gratinar", "nl": "gratineren", "en": "to gratin", "cat": "keuken_bereiding_extra"}, {"pt": "flambar", "nl": "flamberen", "en": "to flambé", "cat": "keuken_bereiding_extra"}, {"pt": "desfiar", "nl": "rafelen", "en": "to shred", "cat": "keuken_bereiding_extra"}, {"pt": "espremer", "nl": "persen/uitknijpen", "en": "to squeeze", "cat": "keuken_bereiding_extra"}, {"pt": "coar", "nl": "zeven/filteren", "en": "to strain", "cat": "keuken_bereiding_extra"}, {"pt": "juntar", "nl": "toevoegen", "en": "to add", "cat": "keuken_bereiding_extra"}, {"pt": "reduzir", "nl": "inkoken/reduceren", "en": "to reduce", "cat": "keuken_bereiding_extra"}, {"pt": "derreter", "nl": "smelten", "en": "to melt", "cat": "keuken_bereiding_extra"}, {"pt": "descaroçar", "nl": "ontpitten", "en": "to pit", "cat": "keuken_bereiding_extra"}, {"pt": "engrossar", "nl": "indikken", "en": "to thicken", "cat": "keuken_bereiding_extra"}, {"pt": "apurar", "nl": "laten intrekken", "en": "to simmer down", "cat": "keuken_bereiding_extra"}, {"pt": "pimenta caiena", "nl": "cayennepeper", "en": "cayenne pepper", "cat": "specerijen_kruiden_extra"}, {"pt": "aneto", "nl": "dille", "en": "dill", "cat": "specerijen_kruiden_extra"}, {"pt": "estragão", "nl": "dragon", "en": "tarragon", "cat": "specerijen_kruiden_extra"}, {"pt": "sálvia", "nl": "salie", "en": "sage", "cat": "specerijen_kruiden_extra"}, {"pt": "cardamomo", "nl": "kardemom", "en": "cardamom", "cat": "specerijen_kruiden_extra"}, {"pt": "baunilha", "nl": "vanille", "en": "vanilla", "cat": "specerijen_kruiden_extra"}, {"pt": "curcuma", "nl": "kurkuma", "en": "turmeric", "cat": "specerijen_kruiden_extra"}, {"pt": "colher de sopa", "nl": "eetlepel (maat)", "en": "tablespoon", "cat": "keuken_maten_extra"}, {"pt": "colher de chá", "nl": "theelepel (maat)", "en": "teaspoon", "cat": "keuken_maten_extra"}, {"pt": "chávena", "nl": "kopje (maat)", "en": "cup", "cat": "keuken_maten_extra"}, {"pt": "pitada", "nl": "snufje", "en": "pinch", "cat": "keuken_maten_extra"}, {"pt": "meio quilo", "nl": "half kilo", "en": "half a kilo", "cat": "keuken_maten_extra"}, {"pt": "um quarto", "nl": "een kwart", "en": "a quarter", "cat": "keuken_maten_extra"}, {"pt": "convidado", "nl": "gast", "en": "guest", "cat": "eten_gelegenheid_extra"}, {"pt": "anfitrião", "nl": "gastheer", "en": "host", "cat": "eten_gelegenheid_extra"}, {"pt": "festa", "nl": "feest", "en": "party", "cat": "eten_gelegenheid_extra"}, {"pt": "aniversário", "nl": "verjaardag", "en": "birthday", "cat": "eten_gelegenheid_extra"}, {"pt": "comemoração", "nl": "viering", "en": "celebration", "cat": "eten_gelegenheid_extra"}, {"pt": "energia", "nl": "energie", "en": "energy", "cat": "voeding_extra"}, {"pt": "digestão", "nl": "spijsvertering", "en": "digestion", "cat": "voeding_extra"}, {"pt": "apetite", "nl": "eetlust", "en": "appetite", "cat": "voeding_extra"}, {"pt": "fome", "nl": "honger", "en": "hunger", "cat": "voeding_extra"}, {"pt": "sede", "nl": "dorst", "en": "thirst", "cat": "voeding_extra"}, {"pt": "descartável", "nl": "wegwerp-", "en": "disposable", "cat": "keuken_extra_voorwerpen"}, {"pt": "palito", "nl": "tandenstoker", "en": "toothpick", "cat": "keuken_extra_voorwerpen"}, {"pt": "canudo", "nl": "rietje", "en": "straw", "cat": "keuken_extra_voorwerpen"}, {"pt": "vela", "nl": "kaars", "en": "candle", "cat": "keuken_extra_voorwerpen"}, {"pt": "paella", "nl": "paella", "en": "paella", "cat": "wereldgerechten_extra"}, {"pt": "risotto", "nl": "risotto", "en": "risotto", "cat": "wereldgerechten_extra"}, {"pt": "gnocchi", "nl": "gnocchi", "en": "gnocchi", "cat": "wereldgerechten_extra"}, {"pt": "falafel", "nl": "falafel", "en": "falafel", "cat": "wereldgerechten_extra"}, {"pt": "kebab", "nl": "kebab", "en": "kebab", "cat": "wereldgerechten_extra"}, {"pt": "dim sum", "nl": "dim sum", "en": "dim sum", "cat": "wereldgerechten_extra"}, {"pt": "ramen", "nl": "ramen", "en": "ramen", "cat": "wereldgerechten_extra"}, {"pt": "burrito", "nl": "burrito", "en": "burrito", "cat": "wereldgerechten_extra"}, {"pt": "francesinha", "nl": "Portugese sandwichspecialiteit", "en": "Francesinha (PT dish)", "cat": "wereldgerechten_extra"}, {"pt": "cozido à portuguesa", "nl": "Portugese stoofpot", "en": "Portuguese stew", "cat": "wereldgerechten_extra"}, {"pt": "caldo verde", "nl": "Portugese koolsoep", "en": "Portuguese kale soup", "cat": "wereldgerechten_extra"}, {"pt": "prato do dia", "nl": "dagschotel", "en": "dish of the day", "cat": "restaurant_maaltijdtypes"}, {"pt": "meia dose", "nl": "halve portie", "en": "half portion", "cat": "restaurant_maaltijdtypes"}, {"pt": "dose", "nl": "portie", "en": "portion", "cat": "restaurant_maaltijdtypes"}, {"pt": "extra", "nl": "extra", "en": "extra", "cat": "restaurant_maaltijdtypes"}, {"pt": "guarnição", "nl": "bijgerecht/garnering", "en": "garnish/side", "cat": "restaurant_maaltijdtypes"}, {"pt": "acompanhamento", "nl": "bijgerecht", "en": "side dish", "cat": "restaurant_maaltijdtypes"}, {"pt": "vinagre balsâmico", "nl": "balsamicoazijn", "en": "balsamic vinegar", "cat": "specerijen_extra2"}, {"pt": "azeite extra virgem", "nl": "extra vergine olijfolie", "en": "extra virgin olive oil", "cat": "specerijen_extra2"}, {"pt": "molho de soja", "nl": "sojasaus", "en": "soy sauce", "cat": "specerijen_extra2"}, {"pt": "molho picante", "nl": "pittige saus", "en": "hot sauce", "cat": "specerijen_extra2"}, {"pt": "caldo", "nl": "bouillon", "en": "broth", "cat": "specerijen_extra2"}, {"pt": "cartão de crédito", "nl": "creditcard", "en": "credit card", "cat": "boodschappen_extra2"}, {"pt": "dinheiro", "nl": "contant geld", "en": "cash", "cat": "boodschappen_extra2"}, {"pt": "multibanco", "nl": "Portugese pinautomaat", "en": "ATM/payment system (PT)", "cat": "boodschappen_extra2"}, {"pt": "pagamento", "nl": "betaling", "en": "payment", "cat": "boodschappen_extra2"}, {"pt": "compra", "nl": "aankoop", "en": "purchase", "cat": "boodschappen_extra2"}, {"pt": "brindar", "nl": "proosten", "en": "to toast (drink)", "cat": "tafelmanieren_extra"}, {"pt": "saúde", "nl": "gezondheid! (toost)", "en": "cheers", "cat": "tafelmanieren_extra"}, {"pt": "bom proveito", "nl": "smakelijk eten", "en": "have a good meal", "cat": "tafelmanieren_extra"}, {"pt": "por conta da casa", "nl": "van het huis", "en": "on the house", "cat": "tafelmanieren_extra"}, {"pt": "detergente", "nl": "afwasmiddel", "en": "dish soap", "cat": "boodschappen_huishouden"}, {"pt": "papel higiénico", "nl": "wc-papier", "en": "toilet paper", "cat": "boodschappen_huishouden"}, {"pt": "saco do lixo", "nl": "vuilniszak", "en": "garbage bag", "cat": "boodschappen_huishouden"}, {"pt": "esponja", "nl": "spons", "en": "sponge", "cat": "boodschappen_huishouden"}, {"pt": "sabão", "nl": "zeep", "en": "soap", "cat": "boodschappen_huishouden"}, {"pt": "lixívia", "nl": "bleekmiddel", "en": "bleach", "cat": "boodschappen_huishouden"}, {"pt": "amaciador", "nl": "wasverzachter", "en": "fabric softener", "cat": "boodschappen_huishouden"}, {"pt": "guardanapos de papel", "nl": "papieren servetten", "en": "paper napkins", "cat": "boodschappen_huishouden"}, {"pt": "mojito", "nl": "mojito", "en": "mojito", "cat": "dranken_extra"}, {"pt": "sangria", "nl": "sangria", "en": "sangria", "cat": "dranken_extra"}, {"pt": "cocktail", "nl": "cocktail", "en": "cocktail", "cat": "dranken_extra"}, {"pt": "shot", "nl": "shotje", "en": "shot", "cat": "dranken_extra"}, {"pt": "cerveja de pressão", "nl": "bier van de tap", "en": "draft beer", "cat": "dranken_extra"}, {"pt": "cerveja sem álcool", "nl": "alcoholvrij bier", "en": "non-alcoholic beer", "cat": "dranken_extra"}, {"pt": "chá gelado", "nl": "ijsthee", "en": "iced tea", "cat": "dranken_extra"}, {"pt": "sumo natural", "nl": "vers sap", "en": "fresh juice", "cat": "dranken_extra"}, {"pt": "gerente", "nl": "manager", "en": "manager", "cat": "restaurant_service_extra"}, {"pt": "cliente", "nl": "klant", "en": "customer", "cat": "restaurant_service_extra"}, {"pt": "fila de espera", "nl": "wachtrij", "en": "waiting line", "cat": "restaurant_service_extra"}, {"pt": "hora de ponta", "nl": "spitsuur", "en": "peak hour", "cat": "restaurant_service_extra"}, {"pt": "avaliação", "nl": "beoordeling", "en": "review", "cat": "restaurant_service_extra"}, {"pt": "ambiente", "nl": "sfeer", "en": "atmosphere", "cat": "restaurant_service_extra"}, {"pt": "decoração", "nl": "decor", "en": "decoration", "cat": "restaurant_service_extra"}, {"pt": "música ao vivo", "nl": "livemuziek", "en": "live music", "cat": "restaurant_service_extra"}, {"pt": "nutritivo", "nl": "voedzaam", "en": "nutritious", "cat": "eten_bijvoeglijk_extra"}, {"pt": "calórico", "nl": "calorierijk", "en": "calorie-rich", "cat": "eten_bijvoeglijk_extra"}, {"pt": "leve", "nl": "licht (voeding)", "en": "light (food)", "cat": "eten_bijvoeglijk_extra"}, {"pt": "pesado", "nl": "zwaar (voeding)", "en": "heavy (food)", "cat": "eten_bijvoeglijk_extra"}, {"pt": "requintado", "nl": "verfijnd", "en": "refined", "cat": "eten_bijvoeglijk_extra"}, {"pt": "tradicional", "nl": "traditioneel", "en": "traditional", "cat": "eten_bijvoeglijk_extra"}, {"pt": "gourmet", "nl": "gourmet", "en": "gourmet", "cat": "eten_bijvoeglijk_extra"}, {"pt": "moedor de pimenta", "nl": "pepermolen", "en": "pepper mill", "cat": "keukengerei_extra"}, {"pt": "boião", "nl": "potje", "en": "jar", "cat": "keukengerei_extra"}, {"pt": "recipiente", "nl": "bakje/houder", "en": "container", "cat": "keukengerei_extra"}, {"pt": "termo", "nl": "thermoskan", "en": "thermos", "cat": "keukengerei_extra"}, {"pt": "molho", "nl": "saus", "en": "sauce", "cat": "keukengerei_extra"}, {"pt": "travessa", "nl": "serveerschotel", "en": "serving dish", "cat": "keukengerei_extra"}, {"pt": "talheres", "nl": "bestek", "en": "cutlery", "cat": "keukengerei_extra"}, {"pt": "pega", "nl": "pannenlap", "en": "oven mitt", "cat": "keukengerei_extra"}, {"pt": "manteiga de amendoim", "nl": "pindakaas", "en": "peanut butter", "cat": "ontbijt_extra"}, {"pt": "compota", "nl": "jam", "en": "jam", "cat": "ontbijt_extra"}, {"pt": "cereais", "nl": "ontbijtgranen", "en": "cereal", "cat": "ontbijt_extra"}, {"pt": "granola", "nl": "granola", "en": "granola", "cat": "ontbijt_extra"}, {"pt": "smoothie", "nl": "smoothie", "en": "smoothie", "cat": "ontbijt_extra"}, {"pt": "tosta", "nl": "getoast broodje", "en": "toasted sandwich", "cat": "ontbijt_extra"}, {"pt": "queijo de cabra", "nl": "geitenkaas", "en": "goat cheese", "cat": "vlees_kaas_soorten"}, {"pt": "presunto", "nl": "gedroogde ham", "en": "cured ham", "cat": "vlees_kaas_soorten"}, {"pt": "chouriço", "nl": "chorizo", "en": "chorizo", "cat": "vlees_kaas_soorten"}, {"pt": "alheira", "nl": "Portugese broodworst", "en": "Portuguese bread sausage", "cat": "vlees_kaas_soorten"}, {"pt": "morcela", "nl": "bloedworst", "en": "black pudding", "cat": "vlees_kaas_soorten"}, {"pt": "bacon", "nl": "bacon", "en": "bacon", "cat": "vlees_kaas_soorten"}, {"pt": "batata-doce", "nl": "zoete aardappel", "en": "sweet potato", "cat": "groenten_fruit_extra"}, {"pt": "rúcula", "nl": "rucola", "en": "arugula", "cat": "groenten_fruit_extra"}, {"pt": "lima", "nl": "limoen", "en": "lime", "cat": "groenten_fruit_extra"}, {"pt": "toranja", "nl": "grapefruit", "en": "grapefruit", "cat": "groenten_fruit_extra"}, {"pt": "abacate", "nl": "avocado", "en": "avocado", "cat": "groenten_fruit_extra"}, {"pt": "uva passa", "nl": "rozijn", "en": "raisin", "cat": "groenten_fruit_extra"}, {"pt": "da época", "nl": "van het seizoen", "en": "in season", "cat": "eten_kwaliteit_herkomst"}, {"pt": "importado", "nl": "geïmporteerd", "en": "imported", "cat": "eten_kwaliteit_herkomst"}, {"pt": "local", "nl": "lokaal", "en": "local", "cat": "eten_kwaliteit_herkomst"}, {"pt": "artesanal", "nl": "ambachtelijk", "en": "artisanal", "cat": "eten_kwaliteit_herkomst"}, {"pt": "colhido", "nl": "geoogst", "en": "harvested", "cat": "eten_kwaliteit_herkomst"}, {"pt": "maduro", "nl": "rijp", "en": "ripe", "cat": "eten_kwaliteit_herkomst"}, {"pt": "verde", "nl": "onrijp", "en": "unripe", "cat": "eten_kwaliteit_herkomst"}, {"pt": "natural", "nl": "natuurlijk", "en": "natural", "cat": "eten_kwaliteit_herkomst"}];
+const WORD_BANK_VERBS = [{"pt": "andar", "nl": "lopen", "en": "to walk", "cat": "beweging_basis"}, {"pt": "correr", "nl": "rennen", "en": "to run", "cat": "beweging_basis"}, {"pt": "caminhar", "nl": "wandelen", "en": "to hike/walk", "cat": "beweging_basis"}, {"pt": "saltar", "nl": "springen", "en": "to jump", "cat": "beweging_basis"}, {"pt": "pular", "nl": "huppelen", "en": "to hop", "cat": "beweging_basis"}, {"pt": "rastejar", "nl": "kruipen", "en": "to crawl", "cat": "beweging_basis"}, {"pt": "marchar", "nl": "marcheren", "en": "to march", "cat": "beweging_basis"}, {"pt": "passear", "nl": "wandelen (voor plezier)", "en": "to stroll", "cat": "beweging_basis"}, {"pt": "deslocar-se", "nl": "zich verplaatsen", "en": "to move around", "cat": "beweging_basis"}, {"pt": "avançar", "nl": "vooruitgaan", "en": "to advance", "cat": "beweging_basis"}, {"pt": "recuar", "nl": "terugtrekken", "en": "to retreat", "cat": "beweging_basis"}, {"pt": "arrastar-se", "nl": "zich voortslepen", "en": "to drag oneself", "cat": "beweging_basis"}, {"pt": "conduzir", "nl": "besturen (voertuig)", "en": "to drive", "cat": "beweging_transport"}, {"pt": "pilotar", "nl": "piloteren", "en": "to pilot", "cat": "beweging_transport"}, {"pt": "navegar", "nl": "varen", "en": "to sail", "cat": "beweging_transport"}, {"pt": "embarcar", "nl": "aan boord gaan", "en": "to board", "cat": "beweging_transport"}, {"pt": "desembarcar", "nl": "van boord gaan", "en": "to disembark", "cat": "beweging_transport"}, {"pt": "aterrar", "nl": "landen", "en": "to land", "cat": "beweging_transport"}, {"pt": "descolar", "nl": "opstijgen", "en": "to take off", "cat": "beweging_transport"}, {"pt": "atracar", "nl": "aanmeren", "en": "to dock", "cat": "beweging_transport"}, {"pt": "estacionar", "nl": "parkeren", "en": "to park", "cat": "beweging_transport"}, {"pt": "ultrapassar", "nl": "inhalen", "en": "to overtake", "cat": "beweging_transport"}, {"pt": "travar", "nl": "remmen", "en": "to brake", "cat": "beweging_transport"}, {"pt": "acelerar", "nl": "versnellen", "en": "to accelerate", "cat": "beweging_transport"}, {"pt": "subir", "nl": "omhoog gaan", "en": "to go up", "cat": "beweging_verticaal"}, {"pt": "descer", "nl": "naar beneden gaan", "en": "to go down", "cat": "beweging_verticaal"}, {"pt": "trepar", "nl": "klimmen", "en": "to climb", "cat": "beweging_verticaal"}, {"pt": "escalar", "nl": "beklimmen", "en": "to scale/climb", "cat": "beweging_verticaal"}, {"pt": "mergulhar", "nl": "duiken", "en": "to dive", "cat": "beweging_verticaal"}, {"pt": "flutuar", "nl": "drijven", "en": "to float", "cat": "beweging_verticaal"}, {"pt": "afundar", "nl": "zinken", "en": "to sink", "cat": "beweging_verticaal"}, {"pt": "cair", "nl": "vallen", "en": "to fall", "cat": "beweging_verticaal"}, {"pt": "tombar", "nl": "omvallen", "en": "to topple", "cat": "beweging_verticaal"}, {"pt": "elevar-se", "nl": "zich verheffen", "en": "to rise up", "cat": "beweging_verticaal"}, {"pt": "falar", "nl": "praten", "en": "to speak", "cat": "communicatie_spreken"}, {"pt": "dizer", "nl": "zeggen", "en": "to say", "cat": "communicatie_spreken"}, {"pt": "conversar", "nl": "converseren", "en": "to chat", "cat": "communicatie_spreken"}, {"pt": "discutir", "nl": "discussiëren", "en": "to discuss/argue", "cat": "communicatie_spreken"}, {"pt": "debater", "nl": "debatteren", "en": "to debate", "cat": "communicatie_spreken"}, {"pt": "argumentar", "nl": "beargumenteren", "en": "to argue a point", "cat": "communicatie_spreken"}, {"pt": "sussurrar", "nl": "fluisteren", "en": "to whisper", "cat": "communicatie_spreken"}, {"pt": "gritar", "nl": "schreeuwen", "en": "to shout", "cat": "communicatie_spreken"}, {"pt": "murmurar", "nl": "mompelen", "en": "to mutter", "cat": "communicatie_spreken"}, {"pt": "articular", "nl": "articuleren", "en": "to articulate", "cat": "communicatie_spreken"}, {"pt": "pronunciar", "nl": "uitspreken", "en": "to pronounce", "cat": "communicatie_spreken"}, {"pt": "comunicar", "nl": "communiceren", "en": "to communicate", "cat": "communicatie_spreken"}, {"pt": "escrever", "nl": "schrijven", "en": "to write", "cat": "communicatie_schrijven"}, {"pt": "redigir", "nl": "opstellen (tekst)", "en": "to draft", "cat": "communicatie_schrijven"}, {"pt": "rabiscar", "nl": "krabbelen", "en": "to scribble", "cat": "communicatie_schrijven"}, {"pt": "assinar", "nl": "ondertekenen", "en": "to sign", "cat": "communicatie_schrijven"}, {"pt": "imprimir", "nl": "printen", "en": "to print", "cat": "communicatie_schrijven"}, {"pt": "digitar", "nl": "typen", "en": "to type", "cat": "communicatie_schrijven"}, {"pt": "anotar", "nl": "noteren", "en": "to jot down", "cat": "communicatie_schrijven"}, {"pt": "sublinhar", "nl": "onderstrepen", "en": "to underline", "cat": "communicatie_schrijven"}, {"pt": "riscar", "nl": "doorstrepen", "en": "to cross out", "cat": "communicatie_schrijven"}, {"pt": "corrigir", "nl": "corrigeren", "en": "to correct", "cat": "communicatie_schrijven"}, {"pt": "perguntar", "nl": "vragen", "en": "to ask", "cat": "communicatie_overig"}, {"pt": "responder", "nl": "antwoorden", "en": "to answer", "cat": "communicatie_overig"}, {"pt": "explicar", "nl": "uitleggen", "en": "to explain", "cat": "communicatie_overig"}, {"pt": "esclarecer", "nl": "verduidelijken", "en": "to clarify", "cat": "communicatie_overig"}, {"pt": "informar", "nl": "informeren", "en": "to inform", "cat": "communicatie_overig"}, {"pt": "avisar", "nl": "waarschuwen", "en": "to warn/notify", "cat": "communicatie_overig"}, {"pt": "anunciar", "nl": "aankondigen", "en": "to announce", "cat": "communicatie_overig"}, {"pt": "declarar", "nl": "verklaren", "en": "to declare", "cat": "communicatie_overig"}, {"pt": "confirmar", "nl": "bevestigen", "en": "to confirm", "cat": "communicatie_overig"}, {"pt": "negar", "nl": "ontkennen", "en": "to deny", "cat": "communicatie_overig"}, {"pt": "admitir", "nl": "toegeven", "en": "to admit", "cat": "communicatie_overig"}, {"pt": "confessar", "nl": "bekennen", "en": "to confess", "cat": "communicatie_overig"}, {"pt": "pensar", "nl": "denken", "en": "to think", "cat": "cognitie_denken"}, {"pt": "refletir", "nl": "nadenken", "en": "to reflect", "cat": "cognitie_denken"}, {"pt": "considerar", "nl": "overwegen", "en": "to consider", "cat": "cognitie_denken"}, {"pt": "analisar", "nl": "analyseren", "en": "to analyse", "cat": "cognitie_denken"}, {"pt": "avaliar", "nl": "beoordelen", "en": "to evaluate", "cat": "cognitie_denken"}, {"pt": "concluir", "nl": "concluderen", "en": "to conclude", "cat": "cognitie_denken"}, {"pt": "deduzir", "nl": "afleiden", "en": "to deduce", "cat": "cognitie_denken"}, {"pt": "raciocinar", "nl": "redeneren", "en": "to reason", "cat": "cognitie_denken"}, {"pt": "imaginar", "nl": "zich voorstellen", "en": "to imagine", "cat": "cognitie_denken"}, {"pt": "fantasiar", "nl": "fantaseren", "en": "to fantasise", "cat": "cognitie_denken"}, {"pt": "saber", "nl": "weten", "en": "to know (fact)", "cat": "cognitie_weten"}, {"pt": "conhecer", "nl": "kennen", "en": "to know (person/place)", "cat": "cognitie_weten"}, {"pt": "aprender", "nl": "leren", "en": "to learn", "cat": "cognitie_weten"}, {"pt": "memorizar", "nl": "uit het hoofd leren", "en": "to memorise", "cat": "cognitie_weten"}, {"pt": "lembrar", "nl": "herinneren", "en": "to remember", "cat": "cognitie_weten"}, {"pt": "esquecer", "nl": "vergeten", "en": "to forget", "cat": "cognitie_weten"}, {"pt": "reconhecer", "nl": "herkennen", "en": "to recognise", "cat": "cognitie_weten"}, {"pt": "compreender", "nl": "begrijpen", "en": "to comprehend", "cat": "cognitie_weten"}, {"pt": "entender", "nl": "snappen", "en": "to understand", "cat": "cognitie_weten"}, {"pt": "interpretar", "nl": "interpreteren", "en": "to interpret", "cat": "cognitie_weten"}, {"pt": "decidir", "nl": "beslissen", "en": "to decide", "cat": "cognitie_beslissen"}, {"pt": "escolher", "nl": "kiezen", "en": "to choose", "cat": "cognitie_beslissen"}, {"pt": "optar", "nl": "opteren", "en": "to opt", "cat": "cognitie_beslissen"}, {"pt": "hesitar", "nl": "aarzelen", "en": "to hesitate", "cat": "cognitie_beslissen"}, {"pt": "duvidar", "nl": "twijfelen", "en": "to doubt", "cat": "cognitie_beslissen"}, {"pt": "concordar", "nl": "het eens zijn", "en": "to agree", "cat": "cognitie_beslissen"}, {"pt": "discordar", "nl": "het oneens zijn", "en": "to disagree", "cat": "cognitie_beslissen"}, {"pt": "aceitar", "nl": "accepteren", "en": "to accept", "cat": "cognitie_beslissen"}, {"pt": "recusar", "nl": "weigeren", "en": "to refuse", "cat": "cognitie_beslissen"}, {"pt": "rejeitar", "nl": "afwijzen", "en": "to reject", "cat": "cognitie_beslissen"}, {"pt": "ver", "nl": "zien", "en": "to see", "cat": "perceptie_zintuigen"}, {"pt": "olhar", "nl": "kijken", "en": "to look", "cat": "perceptie_zintuigen"}, {"pt": "observar", "nl": "observeren", "en": "to observe", "cat": "perceptie_zintuigen"}, {"pt": "notar", "nl": "opmerken", "en": "to notice", "cat": "perceptie_zintuigen"}, {"pt": "ouvir", "nl": "horen", "en": "to hear", "cat": "perceptie_zintuigen"}, {"pt": "escutar", "nl": "luisteren", "en": "to listen", "cat": "perceptie_zintuigen"}, {"pt": "sentir", "nl": "voelen", "en": "to feel", "cat": "perceptie_zintuigen"}, {"pt": "cheirar", "nl": "ruiken", "en": "to smell", "cat": "perceptie_zintuigen"}, {"pt": "tocar", "nl": "aanraken", "en": "to touch", "cat": "perceptie_zintuigen"}, {"pt": "gostar", "nl": "leuk vinden", "en": "to like", "cat": "emoties_positief"}, {"pt": "amar", "nl": "liefhebben", "en": "to love", "cat": "emoties_positief"}, {"pt": "adorar", "nl": "dol zijn op", "en": "to adore", "cat": "emoties_positief"}, {"pt": "apreciar", "nl": "waarderen", "en": "to appreciate", "cat": "emoties_positief"}, {"pt": "admirar", "nl": "bewonderen", "en": "to admire", "cat": "emoties_positief"}, {"pt": "desejar", "nl": "verlangen", "en": "to wish/desire", "cat": "emoties_positief"}, {"pt": "sonhar", "nl": "dromen", "en": "to dream", "cat": "emoties_positief"}, {"pt": "sorrir", "nl": "glimlachen", "en": "to smile", "cat": "emoties_positief"}, {"pt": "rir", "nl": "lachen", "en": "to laugh", "cat": "emoties_positief"}, {"pt": "animar-se", "nl": "opgewekt worden", "en": "to cheer up", "cat": "emoties_positief"}, {"pt": "odiar", "nl": "haten", "en": "to hate", "cat": "emoties_negatief"}, {"pt": "detestar", "nl": "verafschuwen", "en": "to detest", "cat": "emoties_negatief"}, {"pt": "temer", "nl": "vrezen", "en": "to fear", "cat": "emoties_negatief"}, {"pt": "assustar-se", "nl": "schrikken", "en": "to get scared", "cat": "emoties_negatief"}, {"pt": "preocupar-se", "nl": "zich zorgen maken", "en": "to worry", "cat": "emoties_negatief"}, {"pt": "entristecer-se", "nl": "verdrietig worden", "en": "to become sad", "cat": "emoties_negatief"}, {"pt": "chorar", "nl": "huilen", "en": "to cry", "cat": "emoties_negatief"}, {"pt": "lamentar", "nl": "betreuren", "en": "to regret", "cat": "emoties_negatief"}, {"pt": "arrepender-se", "nl": "spijt hebben", "en": "to regret/repent", "cat": "emoties_negatief"}, {"pt": "desanimar", "nl": "de moed verliezen", "en": "to lose heart", "cat": "emoties_negatief"}, {"pt": "acordar", "nl": "wakker worden", "en": "to wake up", "cat": "dagelijkse_routine"}, {"pt": "levantar-se", "nl": "opstaan", "en": "to get up", "cat": "dagelijkse_routine"}, {"pt": "vestir-se", "nl": "zich aankleden", "en": "to get dressed", "cat": "dagelijkse_routine"}, {"pt": "despir-se", "nl": "zich uitkleden", "en": "to undress", "cat": "dagelijkse_routine"}, {"pt": "lavar-se", "nl": "zich wassen", "en": "to wash oneself", "cat": "dagelijkse_routine"}, {"pt": "pentear-se", "nl": "zich kammen", "en": "to comb one's hair", "cat": "dagelijkse_routine"}, {"pt": "arranjar-se", "nl": "zich klaarmaken", "en": "to get ready", "cat": "dagelijkse_routine"}, {"pt": "deitar-se", "nl": "gaan liggen", "en": "to lie down", "cat": "dagelijkse_routine"}, {"pt": "adormecer", "nl": "in slaap vallen", "en": "to fall asleep", "cat": "dagelijkse_routine"}, {"pt": "descansar", "nl": "uitrusten", "en": "to rest", "cat": "dagelijkse_routine"}, {"pt": "comer", "nl": "eten", "en": "to eat", "cat": "eten_drinken_verbs"}, {"pt": "beber", "nl": "drinken", "en": "to drink", "cat": "eten_drinken_verbs"}, {"pt": "mastigar", "nl": "kauwen", "en": "to chew", "cat": "eten_drinken_verbs"}, {"pt": "engolir", "nl": "doorslikken", "en": "to swallow", "cat": "eten_drinken_verbs"}, {"pt": "provar", "nl": "proeven", "en": "to taste", "cat": "eten_drinken_verbs"}, {"pt": "lanchar", "nl": "tussendoortje eten", "en": "to have a snack", "cat": "eten_drinken_verbs"}, {"pt": "jantar", "nl": "avondeten", "en": "to have dinner", "cat": "eten_drinken_verbs"}, {"pt": "almoçar", "nl": "lunchen", "en": "to have lunch", "cat": "eten_drinken_verbs"}, {"pt": "alimentar", "nl": "voeden", "en": "to feed", "cat": "eten_drinken_verbs"}, {"pt": "cozinhar", "nl": "koken", "en": "to cook", "cat": "koken_verbs"}, {"pt": "fritar", "nl": "bakken/frituren", "en": "to fry", "cat": "koken_verbs"}, {"pt": "assar", "nl": "roosteren", "en": "to roast/bake", "cat": "koken_verbs"}, {"pt": "ferver", "nl": "koken (water)", "en": "to boil", "cat": "koken_verbs"}, {"pt": "temperar", "nl": "kruiden", "en": "to season", "cat": "koken_verbs"}, {"pt": "misturar", "nl": "mengen", "en": "to mix", "cat": "koken_verbs"}, {"pt": "cortar", "nl": "snijden", "en": "to cut", "cat": "koken_verbs"}, {"pt": "descascar", "nl": "schillen", "en": "to peel", "cat": "koken_verbs"}, {"pt": "grelhar", "nl": "grillen", "en": "to grill", "cat": "koken_verbs"}, {"pt": "congelar", "nl": "invriezen", "en": "to freeze", "cat": "koken_verbs"}, {"pt": "limpar", "nl": "schoonmaken", "en": "to clean", "cat": "huishouden"}, {"pt": "lavar", "nl": "wassen", "en": "to wash", "cat": "huishouden"}, {"pt": "varrer", "nl": "vegen", "en": "to sweep", "cat": "huishouden"}, {"pt": "aspirar", "nl": "stofzuigen", "en": "to vacuum", "cat": "huishouden"}, {"pt": "arrumar", "nl": "opruimen", "en": "to tidy up", "cat": "huishouden"}, {"pt": "organizar", "nl": "organiseren", "en": "to organise", "cat": "huishouden"}, {"pt": "arejar", "nl": "luchten", "en": "to air out", "cat": "huishouden"}, {"pt": "passar a ferro", "nl": "strijken", "en": "to iron", "cat": "huishouden"}, {"pt": "sacudir", "nl": "uitschudden", "en": "to shake out", "cat": "huishouden"}, {"pt": "esvaziar", "nl": "legen", "en": "to empty", "cat": "huishouden"}, {"pt": "trabalhar", "nl": "werken", "en": "to work", "cat": "werk_professioneel"}, {"pt": "empregar", "nl": "in dienst nemen", "en": "to employ", "cat": "werk_professioneel"}, {"pt": "contratar", "nl": "aannemen", "en": "to hire", "cat": "werk_professioneel"}, {"pt": "despedir", "nl": "ontslaan", "en": "to fire", "cat": "werk_professioneel"}, {"pt": "demitir-se", "nl": "ontslag nemen", "en": "to resign", "cat": "werk_professioneel"}, {"pt": "reformar-se", "nl": "met pensioen gaan", "en": "to retire", "cat": "werk_professioneel"}, {"pt": "candidatar-se", "nl": "solliciteren", "en": "to apply", "cat": "werk_professioneel"}, {"pt": "entrevistar", "nl": "interviewen", "en": "to interview", "cat": "werk_professioneel"}, {"pt": "gerir", "nl": "beheren", "en": "to manage", "cat": "werk_professioneel"}, {"pt": "administrar", "nl": "besturen/beheren", "en": "to administer", "cat": "werk_professioneel"}, {"pt": "comprar", "nl": "kopen", "en": "to buy", "cat": "business_financieel"}, {"pt": "vender", "nl": "verkopen", "en": "to sell", "cat": "business_financieel"}, {"pt": "pagar", "nl": "betalen", "en": "to pay", "cat": "business_financieel"}, {"pt": "cobrar", "nl": "incasseren", "en": "to charge", "cat": "business_financieel"}, {"pt": "poupar", "nl": "sparen", "en": "to save (money)", "cat": "business_financieel"}, {"pt": "gastar", "nl": "uitgeven", "en": "to spend", "cat": "business_financieel"}, {"pt": "investir", "nl": "investeren", "en": "to invest", "cat": "business_financieel"}, {"pt": "emprestar", "nl": "lenen (uitlenen)", "en": "to lend", "cat": "business_financieel"}, {"pt": "devolver", "nl": "teruggeven", "en": "to give back", "cat": "business_financieel"}, {"pt": "negociar", "nl": "onderhandelen", "en": "to negotiate", "cat": "business_financieel"}, {"pt": "faturar", "nl": "factureren", "en": "to invoice", "cat": "business_financieel"}, {"pt": "orçar", "nl": "begroten", "en": "to budget", "cat": "business_financieel"}, {"pt": "estudar", "nl": "studeren", "en": "to study", "cat": "onderwijs"}, {"pt": "ensinar", "nl": "onderwijzen", "en": "to teach", "cat": "onderwijs"}, {"pt": "formar", "nl": "opleiden", "en": "to train/educate", "cat": "onderwijs"}, {"pt": "treinar", "nl": "trainen", "en": "to train", "cat": "onderwijs"}, {"pt": "praticar", "nl": "oefenen", "en": "to practise", "cat": "onderwijs"}, {"pt": "examinar", "nl": "examineren", "en": "to examine", "cat": "onderwijs"}, {"pt": "graduar-se", "nl": "afstuderen", "en": "to graduate", "cat": "onderwijs"}, {"pt": "matricular-se", "nl": "zich inschrijven", "en": "to enrol", "cat": "onderwijs"}, {"pt": "ter", "nl": "hebben", "en": "to have", "cat": "bezit_uitwisseling"}, {"pt": "possuir", "nl": "bezitten", "en": "to possess", "cat": "bezit_uitwisseling"}, {"pt": "dar", "nl": "geven", "en": "to give", "cat": "bezit_uitwisseling"}, {"pt": "receber", "nl": "ontvangen", "en": "to receive", "cat": "bezit_uitwisseling"}, {"pt": "oferecer", "nl": "aanbieden/schenken", "en": "to offer/give", "cat": "bezit_uitwisseling"}, {"pt": "trocar", "nl": "ruilen", "en": "to exchange", "cat": "bezit_uitwisseling"}, {"pt": "partilhar", "nl": "delen", "en": "to share", "cat": "bezit_uitwisseling"}, {"pt": "pedir emprestado", "nl": "lenen (te leen vragen)", "en": "to borrow", "cat": "bezit_uitwisseling"}, {"pt": "doar", "nl": "doneren", "en": "to donate", "cat": "bezit_uitwisseling"}, {"pt": "apresentar", "nl": "voorstellen (iemand)", "en": "to introduce", "cat": "sociale_interactie"}, {"pt": "cumprimentar", "nl": "begroeten", "en": "to greet", "cat": "sociale_interactie"}, {"pt": "despedir-se", "nl": "afscheid nemen", "en": "to say goodbye", "cat": "sociale_interactie"}, {"pt": "convidar", "nl": "uitnodigen", "en": "to invite", "cat": "sociale_interactie"}, {"pt": "encontrar-se", "nl": "elkaar ontmoeten", "en": "to meet up", "cat": "sociale_interactie"}, {"pt": "reunir-se", "nl": "bijeenkomen", "en": "to gather", "cat": "sociale_interactie"}, {"pt": "acompanhar", "nl": "begeleiden", "en": "to accompany", "cat": "sociale_interactie"}, {"pt": "ajudar", "nl": "helpen", "en": "to help", "cat": "sociale_interactie"}, {"pt": "casar", "nl": "trouwen", "en": "to marry", "cat": "familie_relaties"}, {"pt": "divorciar-se", "nl": "scheiden", "en": "to divorce", "cat": "familie_relaties"}, {"pt": "namorar", "nl": "verkering hebben", "en": "to date", "cat": "familie_relaties"}, {"pt": "apaixonar-se", "nl": "verliefd worden", "en": "to fall in love", "cat": "familie_relaties"}, {"pt": "criar", "nl": "opvoeden", "en": "to raise (children)", "cat": "familie_relaties"}, {"pt": "educar", "nl": "opvoeden/onderwijzen", "en": "to educate", "cat": "familie_relaties"}, {"pt": "cuidar", "nl": "zorgen voor", "en": "to take care of", "cat": "familie_relaties"}, {"pt": "adotar", "nl": "adopteren", "en": "to adopt", "cat": "familie_relaties"}, {"pt": "nascer", "nl": "geboren worden", "en": "to be born", "cat": "familie_relaties"}, {"pt": "crescer", "nl": "groeien", "en": "to grow", "cat": "familie_relaties"}, {"pt": "envelhecer", "nl": "ouder worden", "en": "to grow old", "cat": "familie_relaties"}, {"pt": "morrer", "nl": "sterven", "en": "to die", "cat": "familie_relaties"}, {"pt": "mudar", "nl": "veranderen", "en": "to change", "cat": "verandering_transformatie"}, {"pt": "transformar", "nl": "transformeren", "en": "to transform", "cat": "verandering_transformatie"}, {"pt": "tornar-se", "nl": "worden", "en": "to become", "cat": "verandering_transformatie"}, {"pt": "diminuir", "nl": "verminderen", "en": "to decrease", "cat": "verandering_transformatie"}, {"pt": "aumentar", "nl": "toenemen", "en": "to increase", "cat": "verandering_transformatie"}, {"pt": "melhorar", "nl": "verbeteren", "en": "to improve", "cat": "verandering_transformatie"}, {"pt": "piorar", "nl": "verslechteren", "en": "to worsen", "cat": "verandering_transformatie"}, {"pt": "desenvolver", "nl": "ontwikkelen", "en": "to develop", "cat": "verandering_transformatie"}, {"pt": "evoluir", "nl": "evolueren", "en": "to evolve", "cat": "verandering_transformatie"}, {"pt": "começar", "nl": "beginnen", "en": "to begin", "cat": "begin_einde"}, {"pt": "iniciar", "nl": "initiëren", "en": "to initiate", "cat": "begin_einde"}, {"pt": "terminar", "nl": "beëindigen", "en": "to end", "cat": "begin_einde"}, {"pt": "acabar", "nl": "eindigen", "en": "to finish", "cat": "begin_einde"}, {"pt": "continuar", "nl": "doorgaan", "en": "to continue", "cat": "begin_einde"}, {"pt": "parar", "nl": "stoppen", "en": "to stop", "cat": "begin_einde"}, {"pt": "interromper", "nl": "onderbreken", "en": "to interrupt", "cat": "begin_einde"}, {"pt": "retomar", "nl": "hervatten", "en": "to resume", "cat": "begin_einde"}, {"pt": "prosseguir", "nl": "voortzetten", "en": "to proceed", "cat": "begin_einde"}, {"pt": "chegar", "nl": "aankomen", "en": "to arrive", "cat": "aankomst_vertrek"}, {"pt": "partir", "nl": "vertrekken", "en": "to depart", "cat": "aankomst_vertrek"}, {"pt": "sair", "nl": "weggaan", "en": "to leave", "cat": "aankomst_vertrek"}, {"pt": "entrar", "nl": "binnengaan", "en": "to enter", "cat": "aankomst_vertrek"}, {"pt": "ficar", "nl": "blijven", "en": "to stay", "cat": "aankomst_vertrek"}, {"pt": "permanecer", "nl": "blijven (formeel)", "en": "to remain", "cat": "aankomst_vertrek"}, {"pt": "regressar", "nl": "terugkeren", "en": "to return", "cat": "aankomst_vertrek"}, {"pt": "voltar", "nl": "terugkomen", "en": "to come back", "cat": "aankomst_vertrek"}, {"pt": "mudar-se", "nl": "verhuizen", "en": "to move house", "cat": "aankomst_vertrek"}, {"pt": "instalar-se", "nl": "zich vestigen", "en": "to settle in", "cat": "aankomst_vertrek"}, {"pt": "construir", "nl": "bouwen", "en": "to build", "cat": "bouwen_repareren"}, {"pt": "edificar", "nl": "optrekken (gebouw)", "en": "to erect", "cat": "bouwen_repareren"}, {"pt": "demolir", "nl": "slopen", "en": "to demolish", "cat": "bouwen_repareren"}, {"pt": "reparar", "nl": "repareren", "en": "to repair", "cat": "bouwen_repareren"}, {"pt": "consertar", "nl": "herstellen (object)", "en": "to fix", "cat": "bouwen_repareren"}, {"pt": "montar", "nl": "monteren", "en": "to assemble", "cat": "bouwen_repareren"}, {"pt": "desmontar", "nl": "demonteren", "en": "to disassemble", "cat": "bouwen_repareren"}, {"pt": "instalar", "nl": "installeren", "en": "to install", "cat": "bouwen_repareren"}, {"pt": "pintar", "nl": "schilderen", "en": "to paint", "cat": "bouwen_repareren"}, {"pt": "decorar", "nl": "decoreren", "en": "to decorate", "cat": "bouwen_repareren"}, {"pt": "ligar", "nl": "aanzetten", "en": "to turn on", "cat": "techniek_computer"}, {"pt": "desligar", "nl": "uitzetten", "en": "to turn off", "cat": "techniek_computer"}, {"pt": "carregar", "nl": "opladen", "en": "to charge (battery)", "cat": "techniek_computer"}, {"pt": "descarregar", "nl": "downloaden", "en": "to download", "cat": "techniek_computer"}, {"pt": "atualizar", "nl": "updaten", "en": "to update", "cat": "techniek_computer"}, {"pt": "configurar", "nl": "configureren", "en": "to configure", "cat": "techniek_computer"}, {"pt": "aceder", "nl": "toegang krijgen", "en": "to access", "cat": "techniek_computer"}, {"pt": "guardar", "nl": "opslaan (bestand)", "en": "to save (file)", "cat": "techniek_computer"}, {"pt": "clicar", "nl": "klikken", "en": "to click", "cat": "techniek_computer"}, {"pt": "navegar (na internet)", "nl": "surfen (internet)", "en": "to browse (internet)", "cat": "techniek_computer"}, {"pt": "chover", "nl": "regenen", "en": "to rain", "cat": "natuur_weer_verbs"}, {"pt": "nevar", "nl": "sneeuwen", "en": "to snow", "cat": "natuur_weer_verbs"}, {"pt": "ventar", "nl": "waaien", "en": "to be windy", "cat": "natuur_weer_verbs"}, {"pt": "trovejar", "nl": "donderen", "en": "to thunder", "cat": "natuur_weer_verbs"}, {"pt": "brilhar", "nl": "schijnen/glanzen", "en": "to shine", "cat": "natuur_weer_verbs"}, {"pt": "amanhecer", "nl": "dag worden", "en": "to dawn", "cat": "natuur_weer_verbs"}, {"pt": "anoitecer", "nl": "donker worden", "en": "to get dark", "cat": "natuur_weer_verbs"}, {"pt": "gelar", "nl": "bevriezen", "en": "to freeze over", "cat": "natuur_weer_verbs"}, {"pt": "florescer", "nl": "bloeien", "en": "to bloom", "cat": "natuur_weer_verbs"}, {"pt": "murchar", "nl": "verwelken", "en": "to wilt", "cat": "natuur_weer_verbs"}, {"pt": "jogar", "nl": "spelen", "en": "to play", "cat": "sport_fysiek"}, {"pt": "nadar", "nl": "zwemmen", "en": "to swim", "cat": "sport_fysiek"}, {"pt": "lutar", "nl": "vechten", "en": "to fight", "cat": "sport_fysiek"}, {"pt": "competir", "nl": "wedijveren", "en": "to compete", "cat": "sport_fysiek"}, {"pt": "vencer", "nl": "winnen", "en": "to win", "cat": "sport_fysiek"}, {"pt": "perder", "nl": "verliezen", "en": "to lose", "cat": "sport_fysiek"}, {"pt": "marcar", "nl": "scoren", "en": "to score", "cat": "sport_fysiek"}, {"pt": "arbitrar", "nl": "scheidsrechteren", "en": "to referee", "cat": "sport_fysiek"}, {"pt": "exercitar-se", "nl": "aan lichaamsbeweging doen", "en": "to exercise", "cat": "sport_fysiek"}, {"pt": "desenhar", "nl": "tekenen", "en": "to draw", "cat": "kunst_creativiteit"}, {"pt": "cantar", "nl": "zingen", "en": "to sing", "cat": "kunst_creativiteit"}, {"pt": "dançar", "nl": "dansen", "en": "to dance", "cat": "kunst_creativiteit"}, {"pt": "compor", "nl": "componeren", "en": "to compose", "cat": "kunst_creativiteit"}, {"pt": "esculpir", "nl": "beeldhouwen", "en": "to sculpt", "cat": "kunst_creativiteit"}, {"pt": "fotografar", "nl": "fotograferen", "en": "to photograph", "cat": "kunst_creativiteit"}, {"pt": "filmar", "nl": "filmen", "en": "to film", "cat": "kunst_creativiteit"}, {"pt": "atuar", "nl": "acteren", "en": "to act", "cat": "kunst_creativiteit"}, {"pt": "encenar", "nl": "regisseren (toneel)", "en": "to stage/direct", "cat": "kunst_creativiteit"}, {"pt": "criar (arte)", "nl": "creëren", "en": "to create", "cat": "kunst_creativiteit"}, {"pt": "legislar", "nl": "wetten maken", "en": "to legislate", "cat": "wetten_bestuur"}, {"pt": "votar", "nl": "stemmen", "en": "to vote", "cat": "wetten_bestuur"}, {"pt": "governar", "nl": "regeren", "en": "to govern", "cat": "wetten_bestuur"}, {"pt": "julgar", "nl": "oordelen", "en": "to judge", "cat": "wetten_bestuur"}, {"pt": "condenar", "nl": "veroordelen", "en": "to convict", "cat": "wetten_bestuur"}, {"pt": "absolver", "nl": "vrijspreken", "en": "to acquit", "cat": "wetten_bestuur"}, {"pt": "multar", "nl": "beboeten", "en": "to fine", "cat": "wetten_bestuur"}, {"pt": "autorizar", "nl": "machtigen", "en": "to authorise", "cat": "wetten_bestuur"}, {"pt": "proibir", "nl": "verbieden", "en": "to forbid", "cat": "wetten_bestuur"}, {"pt": "permitir", "nl": "toestaan", "en": "to allow", "cat": "wetten_bestuur"}, {"pt": "curar", "nl": "genezen", "en": "to cure", "cat": "gezondheid_medisch"}, {"pt": "tratar", "nl": "behandelen", "en": "to treat", "cat": "gezondheid_medisch"}, {"pt": "operar", "nl": "opereren", "en": "to operate", "cat": "gezondheid_medisch"}, {"pt": "vacinar", "nl": "vaccineren", "en": "to vaccinate", "cat": "gezondheid_medisch"}, {"pt": "diagnosticar", "nl": "diagnosticeren", "en": "to diagnose", "cat": "gezondheid_medisch"}, {"pt": "medicar", "nl": "medicijnen geven", "en": "to medicate", "cat": "gezondheid_medisch"}, {"pt": "internar", "nl": "opnemen (ziekenhuis)", "en": "to admit (hospital)", "cat": "gezondheid_medisch"}, {"pt": "recuperar", "nl": "herstellen (gezondheid)", "en": "to recover", "cat": "gezondheid_medisch"}, {"pt": "adoecer", "nl": "ziek worden", "en": "to fall ill", "cat": "gezondheid_medisch"}, {"pt": "sarar", "nl": "genezen (wond)", "en": "to heal", "cat": "gezondheid_medisch"}, {"pt": "viajar", "nl": "reizen", "en": "to travel", "cat": "reizen"}, {"pt": "voar", "nl": "vliegen", "en": "to fly", "cat": "reizen"}, {"pt": "hospedar-se", "nl": "logeren", "en": "to stay (lodging)", "cat": "reizen"}, {"pt": "reservar", "nl": "reserveren", "en": "to book", "cat": "reizen"}, {"pt": "embalar", "nl": "inpakken (koffer)", "en": "to pack", "cat": "reizen"}, {"pt": "desembalar", "nl": "uitpakken", "en": "to unpack", "cat": "reizen"}, {"pt": "explorar", "nl": "verkennen", "en": "to explore", "cat": "reizen"}, {"pt": "visitar", "nl": "bezoeken", "en": "to visit", "cat": "reizen"}, {"pt": "perder-se", "nl": "verdwalen", "en": "to get lost", "cat": "reizen"}, {"pt": "orientar-se", "nl": "zich oriënteren", "en": "to find one's way", "cat": "reizen"}, {"pt": "comparar", "nl": "vergelijken", "en": "to compare", "cat": "graden_vergelijking"}, {"pt": "igualar", "nl": "gelijkstellen", "en": "to equal", "cat": "graden_vergelijking"}, {"pt": "superar", "nl": "overtreffen", "en": "to surpass", "cat": "graden_vergelijking"}, {"pt": "equivaler", "nl": "gelijkstaan aan", "en": "to be equivalent to", "cat": "graden_vergelijking"}, {"pt": "exceder", "nl": "overschrijden", "en": "to exceed", "cat": "graden_vergelijking"}, {"pt": "faltar", "nl": "ontbreken", "en": "to be missing", "cat": "graden_vergelijking"}, {"pt": "sobrar", "nl": "overblijven", "en": "to be left over", "cat": "graden_vergelijking"}, {"pt": "bastar", "nl": "voldoende zijn", "en": "to be enough", "cat": "graden_vergelijking"}, {"pt": "alcançar", "nl": "bereiken", "en": "to reach", "cat": "graden_vergelijking"}, {"pt": "plantar", "nl": "planten", "en": "to plant", "cat": "landbouw_natuur"}, {"pt": "semear", "nl": "zaaien", "en": "to sow", "cat": "landbouw_natuur"}, {"pt": "colher", "nl": "oogsten", "en": "to harvest", "cat": "landbouw_natuur"}, {"pt": "regar", "nl": "besproeien", "en": "to water", "cat": "landbouw_natuur"}, {"pt": "cultivar", "nl": "kweken", "en": "to cultivate", "cat": "landbouw_natuur"}, {"pt": "criar (animais)", "nl": "fokken", "en": "to raise (animals)", "cat": "landbouw_natuur"}, {"pt": "pastar", "nl": "grazen", "en": "to graze", "cat": "landbouw_natuur"}, {"pt": "ordenhar", "nl": "melken", "en": "to milk", "cat": "landbouw_natuur"}, {"pt": "podar", "nl": "snoeien", "en": "to prune", "cat": "landbouw_natuur"}, {"pt": "adubar", "nl": "bemesten", "en": "to fertilise", "cat": "landbouw_natuur"}, {"pt": "fabricar", "nl": "fabriceren", "en": "to manufacture", "cat": "industrie_productie"}, {"pt": "produzir", "nl": "produceren", "en": "to produce", "cat": "industrie_productie"}, {"pt": "exportar", "nl": "exporteren", "en": "to export", "cat": "industrie_productie"}, {"pt": "importar", "nl": "importeren", "en": "to import", "cat": "industrie_productie"}, {"pt": "distribuir", "nl": "distribueren", "en": "to distribute", "cat": "industrie_productie"}, {"pt": "fornecer", "nl": "leveren", "en": "to supply", "cat": "industrie_productie"}, {"pt": "reciclar", "nl": "recyclen", "en": "to recycle", "cat": "industrie_productie"}, {"pt": "poluir", "nl": "vervuilen", "en": "to pollute", "cat": "industrie_productie"}, {"pt": "embalar (produtos)", "nl": "verpakken (producten)", "en": "to package (goods)", "cat": "industrie_productie"}, {"pt": "empurrar", "nl": "duwen", "en": "to push", "cat": "beweging_extra"}, {"pt": "puxar", "nl": "trekken", "en": "to pull", "cat": "beweging_extra"}, {"pt": "levantar", "nl": "tillen", "en": "to lift", "cat": "beweging_extra"}, {"pt": "baixar", "nl": "laten zakken", "en": "to lower", "cat": "beweging_extra"}, {"pt": "apanhar", "nl": "oprapen/pakken", "en": "to pick up", "cat": "beweging_extra"}, {"pt": "largar", "nl": "loslaten", "en": "to let go", "cat": "beweging_extra"}, {"pt": "agarrar", "nl": "vastgrijpen", "en": "to grab", "cat": "beweging_extra"}, {"pt": "segurar", "nl": "vasthouden", "en": "to hold", "cat": "beweging_extra"}, {"pt": "lançar", "nl": "gooien", "en": "to throw", "cat": "beweging_extra"}, {"pt": "apanhar (bola)", "nl": "vangen", "en": "to catch", "cat": "beweging_extra"}, {"pt": "telefonar", "nl": "bellen", "en": "to phone", "cat": "communicatie_technologie"}, {"pt": "ligar (telefone)", "nl": "opbellen", "en": "to call", "cat": "communicatie_technologie"}, {"pt": "enviar", "nl": "versturen", "en": "to send", "cat": "communicatie_technologie"}, {"pt": "receber (mensagem)", "nl": "ontvangen (bericht)", "en": "to receive (message)", "cat": "communicatie_technologie"}, {"pt": "responder (mensagem)", "nl": "antwoorden (bericht)", "en": "to reply (message)", "cat": "communicatie_technologie"}, {"pt": "publicar", "nl": "publiceren", "en": "to post/publish", "cat": "communicatie_technologie"}, {"pt": "partilhar (online)", "nl": "delen (online)", "en": "to share (online)", "cat": "communicatie_technologie"}, {"pt": "seguir (redes sociais)", "nl": "volgen (social media)", "en": "to follow (social media)", "cat": "communicatie_technologie"}, {"pt": "comentar", "nl": "reageren/becommentariëren", "en": "to comment", "cat": "communicatie_technologie"}, {"pt": "gravar", "nl": "opnemen", "en": "to record", "cat": "communicatie_technologie"}, {"pt": "planear", "nl": "plannen", "en": "to plan", "cat": "besluitvorming_plannen"}, {"pt": "organizar (evento)", "nl": "organiseren (evenement)", "en": "to organise (event)", "cat": "besluitvorming_plannen"}, {"pt": "preparar", "nl": "voorbereiden", "en": "to prepare", "cat": "besluitvorming_plannen"}, {"pt": "agendar", "nl": "inplannen", "en": "to schedule", "cat": "besluitvorming_plannen"}, {"pt": "cancelar", "nl": "annuleren", "en": "to cancel", "cat": "besluitvorming_plannen"}, {"pt": "adiar", "nl": "uitstellen", "en": "to postpone", "cat": "besluitvorming_plannen"}, {"pt": "antecipar", "nl": "vervroegen", "en": "to bring forward", "cat": "besluitvorming_plannen"}, {"pt": "marcar (encontro)", "nl": "afspreken", "en": "to arrange (meeting)", "cat": "besluitvorming_plannen"}, {"pt": "expressar", "nl": "uitdrukken", "en": "to express", "cat": "emoties_uitdrukking"}, {"pt": "manifestar", "nl": "manifesteren/tonen", "en": "to manifest", "cat": "emoties_uitdrukking"}, {"pt": "reagir", "nl": "reageren", "en": "to react", "cat": "emoties_uitdrukking"}, {"pt": "surpreender-se", "nl": "verrast zijn", "en": "to be surprised", "cat": "emoties_uitdrukking"}, {"pt": "acalmar-se", "nl": "kalmeren", "en": "to calm down", "cat": "emoties_uitdrukking"}, {"pt": "irritar-se", "nl": "geïrriteerd raken", "en": "to get irritated", "cat": "emoties_uitdrukking"}, {"pt": "emocionar-se", "nl": "ontroerd raken", "en": "to become emotional", "cat": "emoties_uitdrukking"}, {"pt": "orgulhar-se", "nl": "trots zijn", "en": "to be proud", "cat": "emoties_uitdrukking"}, {"pt": "fazer", "nl": "doen/maken", "en": "to do/make", "cat": "actie_algemeen"}, {"pt": "agir", "nl": "handelen", "en": "to take action", "cat": "actie_algemeen"}, {"pt": "realizar", "nl": "verwezenlijken", "en": "to accomplish", "cat": "actie_algemeen"}, {"pt": "executar", "nl": "uitvoeren", "en": "to execute", "cat": "actie_algemeen"}, {"pt": "tentar", "nl": "proberen", "en": "to try", "cat": "actie_algemeen"}, {"pt": "conseguir", "nl": "slagen erin", "en": "to manage to", "cat": "actie_algemeen"}, {"pt": "falhar", "nl": "falen", "en": "to fail", "cat": "actie_algemeen"}, {"pt": "evitar", "nl": "vermijden", "en": "to avoid", "cat": "actie_algemeen"}, {"pt": "arriscar", "nl": "riskeren", "en": "to risk", "cat": "actie_algemeen"}, {"pt": "provocar", "nl": "veroorzaken/uitlokken", "en": "to provoke", "cat": "actie_algemeen"}, {"pt": "proteger", "nl": "beschermen", "en": "to protect", "cat": "bescherming_veiligheid"}, {"pt": "defender", "nl": "verdedigen", "en": "to defend", "cat": "bescherming_veiligheid"}, {"pt": "salvar", "nl": "redden", "en": "to save/rescue", "cat": "bescherming_veiligheid"}, {"pt": "socorrer", "nl": "te hulp schieten", "en": "to assist/rescue", "cat": "bescherming_veiligheid"}, {"pt": "avisar (perigo)", "nl": "waarschuwen (gevaar)", "en": "to warn (danger)", "cat": "bescherming_veiligheid"}, {"pt": "prevenir", "nl": "voorkomen", "en": "to prevent", "cat": "bescherming_veiligheid"}, {"pt": "arriscar-se", "nl": "zich riskeren", "en": "to take a risk", "cat": "bescherming_veiligheid"}, {"pt": "assegurar", "nl": "verzekeren/garanderen", "en": "to ensure", "cat": "bescherming_veiligheid"}, {"pt": "querer", "nl": "willen", "en": "to want", "cat": "verlangen_intentie"}, {"pt": "pretender", "nl": "van plan zijn", "en": "to intend", "cat": "verlangen_intentie"}, {"pt": "empenhar-se", "nl": "zich inzetten", "en": "to strive", "cat": "verlangen_intentie"}, {"pt": "almejar", "nl": "nastreven", "en": "to aspire to", "cat": "verlangen_intentie"}, {"pt": "ambicionar", "nl": "ambiëren", "en": "to aspire/covet", "cat": "verlangen_intentie"}, {"pt": "cobiçar", "nl": "begeren", "en": "to covet", "cat": "verlangen_intentie"}, {"pt": "insistir", "nl": "aandringen", "en": "to insist", "cat": "verlangen_intentie"}, {"pt": "exigir", "nl": "eisen", "en": "to demand", "cat": "verlangen_intentie"}, {"pt": "concentrar-se", "nl": "concentreren", "en": "to concentrate", "cat": "mentale_toestand_extra"}, {"pt": "distrair-se", "nl": "zich laten afleiden", "en": "to get distracted", "cat": "mentale_toestand_extra"}, {"pt": "relaxar", "nl": "ontspannen", "en": "to relax", "cat": "mentale_toestand_extra"}, {"pt": "meditar", "nl": "mediteren", "en": "to meditate", "cat": "mentale_toestand_extra"}, {"pt": "contemplar", "nl": "overpeinzen", "en": "to contemplate", "cat": "mentale_toestand_extra"}, {"pt": "ponderar", "nl": "afwegen", "en": "to ponder", "cat": "mentale_toestand_extra"}, {"pt": "especular", "nl": "speculeren", "en": "to speculate", "cat": "mentale_toestand_extra"}, {"pt": "focar-se", "nl": "zich richten op", "en": "to focus", "cat": "mentale_toestand_extra"}, {"pt": "elogiar", "nl": "prijzen", "en": "to praise", "cat": "spraak_uitdrukkingen_extra"}, {"pt": "criticar", "nl": "bekritiseren", "en": "to criticise", "cat": "spraak_uitdrukkingen_extra"}, {"pt": "insultar", "nl": "beledigen", "en": "to insult", "cat": "spraak_uitdrukkingen_extra"}, {"pt": "ameaçar", "nl": "bedreigen", "en": "to threaten", "cat": "spraak_uitdrukkingen_extra"}, {"pt": "prometer", "nl": "beloven", "en": "to promise", "cat": "spraak_uitdrukkingen_extra"}, {"pt": "jurar", "nl": "zweren", "en": "to swear", "cat": "spraak_uitdrukkingen_extra"}, {"pt": "convencer", "nl": "overtuigen", "en": "to convince", "cat": "spraak_uitdrukkingen_extra"}, {"pt": "persuadir", "nl": "overhalen", "en": "to persuade", "cat": "spraak_uitdrukkingen_extra"}, {"pt": "abraçar", "nl": "omhelzen", "en": "to hug", "cat": "fysieke_actie_extra"}, {"pt": "beijar", "nl": "kussen", "en": "to kiss", "cat": "fysieke_actie_extra"}, {"pt": "acenar", "nl": "zwaaien", "en": "to wave", "cat": "fysieke_actie_extra"}, {"pt": "apontar", "nl": "wijzen", "en": "to point", "cat": "fysieke_actie_extra"}, {"pt": "inclinar-se", "nl": "buigen", "en": "to lean/bow", "cat": "fysieke_actie_extra"}, {"pt": "ajoelhar-se", "nl": "knielen", "en": "to kneel", "cat": "fysieke_actie_extra"}, {"pt": "deitar", "nl": "neerleggen", "en": "to lay down", "cat": "fysieke_actie_extra"}, {"pt": "esticar", "nl": "strekken", "en": "to stretch", "cat": "fysieke_actie_extra"}, {"pt": "dobrar", "nl": "vouwen/buigen", "en": "to fold/bend", "cat": "fysieke_actie_extra"}, {"pt": "torcer", "nl": "draaien/verrekken", "en": "to twist/sprain", "cat": "fysieke_actie_extra"}, {"pt": "atravessar", "nl": "oversteken", "en": "to cross", "cat": "reizen_extra"}, {"pt": "cruzar", "nl": "kruisen", "en": "to cross paths", "cat": "reizen_extra"}, {"pt": "rodear", "nl": "omcirkelen", "en": "to surround", "cat": "reizen_extra"}, {"pt": "contornar", "nl": "omzeilen", "en": "to go around", "cat": "reizen_extra"}, {"pt": "seguir", "nl": "volgen", "en": "to follow", "cat": "reizen_extra"}, {"pt": "guiar", "nl": "leiden/gidsen", "en": "to guide", "cat": "reizen_extra"}, {"pt": "orientar", "nl": "navigeren/begeleiden", "en": "to orient/guide", "cat": "reizen_extra"}, {"pt": "localizar", "nl": "lokaliseren", "en": "to locate", "cat": "reizen_extra"}, {"pt": "alugar", "nl": "huren", "en": "to rent", "cat": "handel_diensten"}, {"pt": "arrendar", "nl": "verhuren", "en": "to lease", "cat": "handel_diensten"}, {"pt": "subscrever", "nl": "abonneren", "en": "to subscribe", "cat": "handel_diensten"}, {"pt": "renovar", "nl": "vernieuwen/verlengen", "en": "to renew", "cat": "handel_diensten"}, {"pt": "reembolsar", "nl": "terugbetalen", "en": "to reimburse", "cat": "handel_diensten"}, {"pt": "garantir", "nl": "garanderen", "en": "to guarantee", "cat": "handel_diensten"}, {"pt": "financiar", "nl": "financieren", "en": "to finance", "cat": "handel_diensten"}, {"pt": "patrocinar", "nl": "sponsoren", "en": "to sponsor", "cat": "handel_diensten"}, {"pt": "inventar", "nl": "uitvinden", "en": "to invent", "cat": "productie_industrie_extra"}, {"pt": "testar", "nl": "testen", "en": "to test", "cat": "productie_industrie_extra"}, {"pt": "aperfeiçoar", "nl": "perfectioneren", "en": "to perfect", "cat": "productie_industrie_extra"}, {"pt": "patentear", "nl": "patenteren", "en": "to patent", "cat": "productie_industrie_extra"}, {"pt": "modernizar", "nl": "moderniseren", "en": "to modernise", "cat": "productie_industrie_extra"}, {"pt": "automatizar", "nl": "automatiseren", "en": "to automate", "cat": "productie_industrie_extra"}, {"pt": "otimizar", "nl": "optimaliseren", "en": "to optimise", "cat": "productie_industrie_extra"}, {"pt": "simplificar", "nl": "vereenvoudigen", "en": "to simplify", "cat": "productie_industrie_extra"}, {"pt": "durar", "nl": "duren", "en": "to last", "cat": "tijd_gerelateerd"}, {"pt": "atrasar-se", "nl": "te laat zijn", "en": "to be late", "cat": "tijd_gerelateerd"}, {"pt": "adiantar-se", "nl": "te vroeg zijn", "en": "to be early", "cat": "tijd_gerelateerd"}, {"pt": "demorar", "nl": "lang duren", "en": "to take a long time", "cat": "tijd_gerelateerd"}, {"pt": "apressar-se", "nl": "zich haasten", "en": "to hurry", "cat": "tijd_gerelateerd"}, {"pt": "programar", "nl": "plannen/programmeren", "en": "to schedule/program", "cat": "tijd_gerelateerd"}, {"pt": "cronometrar", "nl": "stopwatch nemen", "en": "to time", "cat": "tijd_gerelateerd"}, {"pt": "pertencer", "nl": "behoren tot", "en": "to belong", "cat": "sociaal_gedrag_extra"}, {"pt": "participar", "nl": "deelnemen", "en": "to participate", "cat": "sociaal_gedrag_extra"}, {"pt": "colaborar", "nl": "samenwerken", "en": "to collaborate", "cat": "sociaal_gedrag_extra"}, {"pt": "cooperar", "nl": "coöpereren", "en": "to cooperate", "cat": "sociaal_gedrag_extra"}, {"pt": "integrar", "nl": "integreren", "en": "to integrate", "cat": "sociaal_gedrag_extra"}, {"pt": "excluir", "nl": "uitsluiten", "en": "to exclude", "cat": "sociaal_gedrag_extra"}, {"pt": "incluir", "nl": "insluiten", "en": "to include", "cat": "sociaal_gedrag_extra"}, {"pt": "escovar", "nl": "borstelen", "en": "to brush", "cat": "verzorging_extra"}, {"pt": "barbear-se", "nl": "zich scheren", "en": "to shave", "cat": "verzorging_extra"}, {"pt": "maquilhar-se", "nl": "zich opmaken", "en": "to put on makeup", "cat": "verzorging_extra"}, {"pt": "hidratar", "nl": "hydrateren", "en": "to moisturise", "cat": "verzorging_extra"}, {"pt": "massajar", "nl": "masseren", "en": "to massage", "cat": "verzorging_extra"}, {"pt": "aparar", "nl": "bijknippen", "en": "to trim", "cat": "verzorging_extra"}, {"pt": "depilar", "nl": "ontharen", "en": "to wax/depilate", "cat": "verzorging_extra"}, {"pt": "latir", "nl": "blaffen", "en": "to bark", "cat": "natuur_dieren_extra"}, {"pt": "miar", "nl": "miauwen", "en": "to meow", "cat": "natuur_dieren_extra"}, {"pt": "morder", "nl": "bijten", "en": "to bite", "cat": "natuur_dieren_extra"}, {"pt": "picar", "nl": "steken (insect)", "en": "to sting", "cat": "natuur_dieren_extra"}, {"pt": "chocar (ovos)", "nl": "broeden", "en": "to hatch/incubate", "cat": "natuur_dieren_extra"}, {"pt": "migrar", "nl": "migreren", "en": "to migrate", "cat": "natuur_dieren_extra"}, {"pt": "hibernar", "nl": "overwinteren", "en": "to hibernate", "cat": "natuur_dieren_extra"}];
+
+const WORD_PACKAGES = [
+  {
+    id: 'basis',
+    name: 'Basiswoorden',
+    description: WORD_BANK_BASIS.length + ' meest gebruikte dagelijkse woorden',
+    words: WORD_BANK_BASIS
+  },
+  {
+    id: 'eten_drinken',
+    name: 'Eten & drinken',
+    description: WORD_BANK_ETEN.length + ' woorden: boodschappen, restaurant en meer',
+    words: WORD_BANK_ETEN
+  },
+  {
+    id: 'werkwoorden',
+    name: 'Werkwoorden',
+    description: WORD_BANK_VERBS.length + ' werkwoorden in het infinitief',
+    words: WORD_BANK_VERBS
+  }
+  // Toekomstige pakketten komen hier bij, bijv.:
+  // { id:'reizen', name:'Op reis', description:'...', words: WORD_BANK_REIZEN }
+];
+
+const LANGS = {
+  pt: {
+    flag:'<svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg"><rect width="60" height="40" fill="#DA291C"/><rect width="24" height="40" fill="#046A38"/><circle cx="24" cy="20" r="7" fill="#FFD100"/></svg>',
+    label:'Portugees (EU)', key:'pt'
+  },
+  nl: {
+    flag:'<svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg"><rect width="60" height="40" fill="#21468B"/><rect width="60" height="26.7" fill="#FFFFFF"/><rect width="60" height="13.3" fill="#AE1C28"/></svg>',
+    label:'Nederlands', key:'nl'
+  },
+  en: {
+    flag:'<svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg"><rect width="60" height="40" fill="#00247D"/><path d="M0 0L60 40M60 0L0 40" stroke="#FFFFFF" stroke-width="8"/><path d="M0 0L60 40M60 0L0 40" stroke="#CF142B" stroke-width="4"/><path d="M30 0V40M0 20H60" stroke="#FFFFFF" stroke-width="14"/><path d="M30 0V40M0 20H60" stroke="#CF142B" stroke-width="8"/></svg>',
+    label:'Engels', key:'en'
+  }
+};
+const LANG_ORDER = ['pt','nl','en'];
+
+function flagIcon(langCode, size){
+  return `<span class="flag-icon" style="${size ? 'width:'+size+'px;height:'+Math.round(size*2/3)+'px;' : ''}">${LANGS[langCode].flag}</span>`;
+}
+
+const POOL_SIZE = 15;
+const MASTER_THRESHOLD = 0.75;
+const MIN_ATTEMPTS_FOR_MASTERY = 3;
+const HISTORY_WINDOW = 6;
+const RESTING_BRING_BACK_CHANCE = 0.2;
+
+let state = {
+  selectedPackage: null,
+  fromLang: 'pt',
+  toLang: 'nl',
+  packageProgress: {}, // packageId -> { 'pt-nl': {stats,pool}, 'nl-en': {stats,pool}, ... }
+  streaks: {}          // packageId -> { current, longest }
+};
+let currentQuestion = null;
+let lastShownId = null;
+let currentView = 'package';
+let answered = false;
+let answeredAt = 0;
+let answeredCorrectly = false;
+const ADVANCE_DELAY_MS = 1000;
+
+function directionKey(){ return state.fromLang + '-' + state.toLang; }
+
+function currentPackage(){
+  return WORD_PACKAGES.find(p => p.id === state.selectedPackage) || WORD_PACKAGES[0];
+}
+function currentWords(){ return currentPackage().words; }
+function bankById(id){ return currentWords()[id]; }
+
+function emptyProgress(){
+  return { stats: {}, pool: [] };
+}
+
+function ensureStat(progress, id){
+  if(!progress.stats[id]){
+    progress.stats[id] = {
+      id, correctTotal:0, incorrectTotal:0, history:[],
+      everMastered:false, lastSeen:null, poolSince:null, restedSince:null, inPool:false,
+      returning:false
+    };
+  }
+  return progress.stats[id];
+}
+
+function pct(stat){
+  if(!stat || stat.history.length === 0) return 0;
+  const sum = stat.history.reduce((a,b)=>a+(b?1:0),0);
+  return Math.round((sum/stat.history.length)*100);
+}
+
+function initPool(progress, words){
+  for(let i=0;i<POOL_SIZE && i<words.length;i++){
+    const s = ensureStat(progress, i);
+    s.inPool = true;
+    s.poolSince = Date.now();
+    progress.pool.push(i);
+  }
+}
+
+function ensureDirectionProgress(packageId, dirKey){
+  if(!packageId) return null;
+  if(!state.packageProgress[packageId]) state.packageProgress[packageId] = {};
+  const pp = state.packageProgress[packageId];
+  const words = (WORD_PACKAGES.find(p => p.id === packageId) || WORD_PACKAGES[0]).words;
+  if(!pp[dirKey]) pp[dirKey] = emptyProgress();
+  if(pp[dirKey].pool.length === 0) initPool(pp[dirKey], words);
+  return pp[dirKey];
+}
+
+function ensurePackageProgress(packageId){
+  ensureDirectionProgress(packageId, directionKey());
+}
+
+function ensureStreak(packageId, dirKey){
+  if(!state.streaks[packageId]) state.streaks[packageId] = {};
+  if(!state.streaks[packageId][dirKey]) state.streaks[packageId][dirKey] = { current:0, longest:0 };
+  return state.streaks[packageId][dirKey];
+}
+
+function applyLoadedResult(res){
+  if(res && res.value){
+    const parsed = JSON.parse(res.value);
+    if(parsed.packageProgress){
+      state.selectedPackage = parsed.selectedPackage || null;
+      state.packageProgress = parsed.packageProgress || {};
+      state.streaks = parsed.streaks || {};
+      if(parsed.fromLang && parsed.toLang){
+        state.fromLang = parsed.fromLang;
+        state.toLang = parsed.toLang;
+      } else if(parsed.direction){
+        const parts = parsed.direction.split('-');
+        state.fromLang = parts[0] || 'pt';
+        state.toLang = parts[1] || 'nl';
+      }
+    } else if(parsed.progress){
+      // migrate the old single-package save into the "basis" package
+      state.selectedPackage = 'basis';
+      state.packageProgress = { basis: parsed.progress };
+      state.streaks = {};
+      if(parsed.direction){
+        const parts = parsed.direction.split('-');
+        state.fromLang = parts[0] || 'pt';
+        state.toLang = parts[1] || 'nl';
+      }
+    }
+  }
+  // res with no value simply means: nothing saved yet, genuinely first run
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem('palavra-progress');
+    if(raw){
+      applyLoadedResult({ value: raw });
+    }
+  }catch(e){ /* localStorage unavailable (e.g. private mode) - start fresh in memory */ }
+}
+
+function saveState(){
+  try{
+    localStorage.setItem('palavra-progress', JSON.stringify(state));
+  }catch(e){ /* storage full or unavailable - fail silently, keep playing */ }
+}
+
+function currentProgress(){
+  return ensureDirectionProgress(state.selectedPackage, directionKey());
+}
+
+function weightedPick(progress){
+  const pool = progress.pool;
+  const candidates = pool.filter(id => id !== lastShownId || pool.length === 1);
+  const weights = candidates.map(id => (100 - pct(progress.stats[id])) + 8);
+  const total = weights.reduce((a,b)=>a+b,0);
+  let r = Math.random()*total;
+  for(let i=0;i<candidates.length;i++){
+    r -= weights[i];
+    if(r <= 0) return candidates[i];
+  }
+  return candidates[candidates.length-1];
+}
+
+function onLangChanged(){
+  lastShownId = null;
+  buildQuestion();
+  saveState();
+  renderApp();
+}
+
+function buildQuestion(){
+  const progress = currentProgress();
+  const words = currentWords();
+  const toKey = state.toLang, fromKey = state.fromLang;
+  const wordId = weightedPick(progress);
+  lastShownId = wordId;
+  const word = bankById(wordId);
+  const correctText = word[toKey];
+  const promptText = word[fromKey];
+
+  const sameCatIds = [];
+  const otherCatIds = [];
+  for(let i=0;i<words.length;i++){
+    if(i === wordId) continue;
+    if(words[i][toKey] === correctText) continue;
+    if(words[i].cat && words[i].cat === word.cat) sameCatIds.push(i);
+    else otherCatIds.push(i);
+  }
+  shuffleArray(sameCatIds);
+  shuffleArray(otherCatIds);
+  // prefer distractors from the same category (similar/confusable words),
+  // fall back to the rest of the bank only if a category is too small
+  const orderedCandidates = [...sameCatIds, ...otherCatIds];
+  const distractorTexts = [];
+  const seen = new Set([correctText]);
+  for(const id of orderedCandidates){
+    const t = words[id][toKey];
+    if(!seen.has(t)){ seen.add(t); distractorTexts.push(t); }
+    if(distractorTexts.length === 3) break;
+  }
+  const options = shuffleArray([correctText, ...distractorTexts]);
+
+  currentQuestion = { wordId, promptText, correctText, options };
+}
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function handleOptionTap(chosenText, btnEl, allBtns){
+  if(answered){
+    // second tap anywhere on the options: move on to the next word.
+    // wrong answers get a short lockout so the correction is actually seen;
+    // correct answers can advance immediately.
+    if(!answeredCorrectly && Date.now() - answeredAt < ADVANCE_DELAY_MS) return;
+    buildQuestion();
+    renderApp();
+    return;
+  }
+  answered = true;
+  answeredAt = Date.now();
+
+  const progress = currentProgress();
+  const stat = ensureStat(progress, currentQuestion.wordId);
+  const isCorrect = chosenText === currentQuestion.correctText;
+  answeredCorrectly = isCorrect;
+  const wasReturning = !!stat.returning;
+
+  stat.history.push(isCorrect);
+  if(stat.history.length > HISTORY_WINDOW) stat.history.shift();
+  if(isCorrect) stat.correctTotal++; else stat.incorrectTotal++;
+  stat.lastSeen = Date.now();
+
+  const streak = ensureStreak(state.selectedPackage, directionKey());
+  if(isCorrect){
+    streak.current++;
+    if(streak.current > streak.longest) streak.longest = streak.current;
+  } else {
+    streak.current = 0;
+  }
+
+  allBtns.forEach(b=>{
+    b.classList.add('answered');
+    if(b.dataset.text === currentQuestion.correctText) b.classList.add('correct');
+    else if(b === btnEl) b.classList.add('incorrect');
+  });
+
+  const p = pct(stat);
+  let masteredNow = false;
+  if(wasReturning && stat.history.length === 1){
+    // a returning (previously resting) word: right first time -> straight back out
+    // of the pool; wrong first time -> it simply stays in the pool as normal
+    if(isCorrect) masteredNow = true;
+    else stat.returning = false;
+  } else if(p >= Math.round(MASTER_THRESHOLD*100) && stat.history.length >= MIN_ATTEMPTS_FOR_MASTERY){
+    masteredNow = true;
+  }
+
+  if(masteredNow){
+    stat.everMastered = true;
+    promoteWord(progress, currentQuestion.wordId);
+  }
+
+  saveState();
+  renderFeedback(isCorrect, p);
+}
+
+function promoteWord(progress, id){
+  const words = currentWords();
+  const stat = progress.stats[id];
+  stat.inPool = false;
+  stat.restedSince = Date.now();
+  progress.pool = progress.pool.filter(x => x !== id);
+
+  const restingIds = Object.values(progress.stats)
+    .filter(s => !s.inPool && s.restedSince && !progress.pool.includes(s.id) && s.id !== id)
+    .sort((a,b)=>a.restedSince - b.restedSince);
+
+  let freshId = null;
+  for(let i=0;i<words.length;i++){
+    if(!progress.stats[i]){ freshId = i; break; }
+  }
+
+  let nextId = null;
+  let nextIsReturning = false;
+  const bringBack = restingIds.length > 0 && Math.random() < RESTING_BRING_BACK_CHANCE;
+  if(bringBack){
+    nextId = restingIds[0].id;
+    progress.stats[nextId].history = [];
+    nextIsReturning = true;
+  } else if(freshId !== null){
+    nextId = freshId;
+  } else if(restingIds.length > 0){
+    nextId = restingIds[0].id;
+    progress.stats[nextId].history = [];
+    nextIsReturning = true;
+  }
+
+  if(nextId !== null){
+    const s = ensureStat(progress, nextId);
+    s.inPool = true;
+    s.poolSince = Date.now();
+    s.restedSince = null;
+    s.returning = nextIsReturning;
+    progress.pool.push(nextId);
+  }
+}
+
+function renderApp(){
+  const app = document.getElementById('app');
+
+  if(currentView === 'package' || !state.selectedPackage){
+    renderPackageView(app);
+    return;
+  }
+
+  const pkg = currentPackage();
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="header-top">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <h1>Palavra</h1>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <div class="icon-btn" id="pkgToggle" title="Woordpakket wisselen">&#128230;</div>
+          <div class="icon-btn" id="statsToggle">${currentView==='quiz' ? '&#128202;' : '&#10005;'}</div>
+        </div>
+      </div>
+      <div class="pkg-label">${pkg.name}</div>
+      <div class="lang-picker">
+        <div class="lang-dropdown" id="fromDropdown">
+          <button class="flag-toggle" id="fromToggle" title="${LANGS[state.fromLang].label}">${flagIcon(state.fromLang, 26)}</button>
+          <div class="lang-menu" id="fromMenu">
+            ${LANG_ORDER.map(l => `<div class="lang-menu-item ${l===state.fromLang?'selected':''}" data-lang="${l}">${flagIcon(l, 20)} ${LANGS[l].label}</div>`).join('')}
+          </div>
+        </div>
+        <button class="swap-btn" id="swapLangBtn" title="Wissel richting">&#8646;</button>
+        <div class="lang-dropdown" id="toDropdown">
+          <button class="flag-toggle" id="toToggle" title="${LANGS[state.toLang].label}">${flagIcon(state.toLang, 26)}</button>
+          <div class="lang-menu" id="toMenu">
+            ${LANG_ORDER.map(l => `<div class="lang-menu-item ${l===state.toLang?'selected':''}" data-lang="${l}">${flagIcon(l, 20)} ${LANGS[l].label}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main ${currentView!=='quiz'?'hidden':''}" id="mainView"></div>
+    <div class="stats-view ${currentView==='stats'?'visible':''}" id="statsView"></div>
+  `;
+
+  document.getElementById('statsToggle').onclick = () => {
+    currentView = currentView === 'quiz' ? 'stats' : 'quiz';
+    renderApp();
+  };
+  document.getElementById('pkgToggle').onclick = () => {
+    currentView = 'package';
+    renderApp();
+  };
+  document.getElementById('fromToggle').onclick = (e) => {
+    e.stopPropagation();
+    document.getElementById('toMenu').classList.remove('open');
+    document.getElementById('fromMenu').classList.toggle('open');
+  };
+  document.getElementById('toToggle').onclick = (e) => {
+    e.stopPropagation();
+    document.getElementById('fromMenu').classList.remove('open');
+    document.getElementById('toMenu').classList.toggle('open');
+  };
+  document.querySelectorAll('#fromMenu .lang-menu-item').forEach(item=>{
+    item.onclick = () => {
+      const val = item.dataset.lang;
+      if(val === state.toLang) state.toLang = state.fromLang;
+      state.fromLang = val;
+      onLangChanged();
+    };
+  });
+  document.querySelectorAll('#toMenu .lang-menu-item').forEach(item=>{
+    item.onclick = () => {
+      const val = item.dataset.lang;
+      if(val === state.fromLang) state.fromLang = state.toLang;
+      state.toLang = val;
+      onLangChanged();
+    };
+  });
+  document.getElementById('swapLangBtn').onclick = () => {
+    const tmp = state.fromLang;
+    state.fromLang = state.toLang;
+    state.toLang = tmp;
+    onLangChanged();
+  };
+
+  if(currentView === 'quiz'){
+    if(!currentQuestion) buildQuestion();
+    renderQuiz();
+  } else {
+    renderStats();
+  }
+}
+
+function renderPackageView(app){
+  app.innerHTML = `
+    <div class="header">
+      <div class="header-top">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <h1>Palavra</h1>
+        </div>
+        ${state.selectedPackage ? '<div class="icon-btn" id="closePkg">&#10005;</div>' : ''}
+      </div>
+      <div class="pkg-label">Kies een woordpakket</div>
+    </div>
+    <div class="package-view" id="packageList"></div>
+  `;
+  const list = document.getElementById('packageList');
+  WORD_PACKAGES.forEach(pkg=>{
+    const isActive = pkg.id === state.selectedPackage;
+    const card = document.createElement('div');
+    card.className = 'package-card' + (isActive ? ' active' : '');
+    card.innerHTML = `
+      <div class="package-card-name">${pkg.name}</div>
+      <div class="package-card-desc">${pkg.description}</div>
+      ${isActive ? '<div class="package-card-tag">Actief</div>' : '<button class="package-card-btn">Kies dit pakket</button>'}
+    `;
+    card.onclick = () => {
+      state.selectedPackage = pkg.id;
+      ensurePackageProgress(pkg.id);
+      ensureStreak(pkg.id, directionKey());
+      lastShownId = null;
+      currentQuestion = null;
+      currentView = 'quiz';
+      buildQuestion();
+      saveState();
+      renderApp();
+    };
+    list.appendChild(card);
+  });
+  if(state.selectedPackage){
+    document.getElementById('closePkg').onclick = () => {
+      currentView = 'quiz';
+      renderApp();
+    };
+  }
+}
+
+function renderTotalTracker(){
+  const el = document.getElementById('totalTracker');
+  if(!el) return;
+  const total = currentWords().length;
+  const mastered = masteredCount();
+  const streak = ensureStreak(state.selectedPackage, directionKey());
+  const pctMastered = total ? Math.round((mastered/total)*100) : 0;
+  el.innerHTML = `
+    <div class="total-tracker-row">
+      <span>${mastered} / ${total} woorden onder de knie</span>
+      <span class="streak-badge">&#128293; ${streak.longest}</span>
+    </div>
+    <div class="total-tracker-bar"><div class="total-tracker-fill" style="width:${pctMastered}%"></div></div>
+  `;
+}
+
+function renderQuiz(){
+  answered = false;
+  const main = document.getElementById('mainView');
+  main.innerHTML = `
+    <div class="total-tracker" id="totalTracker"></div>
+    <div class="prompt-card">
+      <div class="prompt-label">${flagIcon(state.fromLang, 16)} ${LANGS[state.fromLang].label}</div>
+      <div class="prompt-word">${currentQuestion.promptText}</div>
+    </div>
+    <div class="options" id="optionsWrap"></div>
+    <div class="feedback-row" id="feedbackRow"></div>
+  `;
+  const wrap = document.getElementById('optionsWrap');
+  currentQuestion.options.forEach(text=>{
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.dataset.text = text;
+    btn.innerHTML = `<span>${text}</span>`;
+    btn.onclick = () => handleOptionTap(text, btn, Array.from(wrap.children));
+    wrap.appendChild(btn);
+  });
+  renderTotalTracker();
+}
+
+function renderFeedback(isCorrect, pctVal){
+  const row = document.getElementById('feedbackRow');
+  row.innerHTML = `
+    <span class="feedback-text ${isCorrect?'ok':'no'}">${isCorrect ? 'Correct — ' + pctVal + '%' : 'Niet correct — ' + pctVal + '%'}</span>
+    <span class="tap-hint">Tik nogmaals voor het volgende woord</span>
+  `;
+  renderTotalTracker();
+}
+
+function masteredCount(){
+  const progress = currentProgress();
+  return Object.values(progress.stats).filter(s=>s.everMastered).length;
+}
+
+function renderStats(){
+  const progress = currentProgress();
+  const streak = ensureStreak(state.selectedPackage, directionKey());
+  const view = document.getElementById('statsView');
+  const poolSorted = [...progress.pool].sort((a,b)=> pct(progress.stats[a]) - pct(progress.stats[b]));
+
+  view.innerHTML = `
+    <div class="stats-summary">
+      <div>
+        <div class="big">${masteredCount()}</div>
+        <div class="lbl">van ${currentWords().length} onder de knie</div>
+      </div>
+      <div>
+        <div class="big">${streak.longest}</div>
+        <div class="lbl">langste reeks goed</div>
+      </div>
+      <div style="text-align:center">
+        <div class="big" style="display:flex; align-items:center; justify-content:center; gap:4px;">${flagIcon(state.fromLang, 20)}→${flagIcon(state.toLang, 20)}</div>
+        <div class="lbl">huidige richting</div>
+      </div>
+    </div>
+    <div class="section-title">Actieve pool (15)</div>
+    <div id="poolList"></div>
+    <button class="reset-btn" id="resetBtn">Voortgang van deze richting resetten</button>
+  `;
+  const list = document.getElementById('poolList');
+  poolSorted.forEach(id=>{
+    const w = bankById(id);
+    const p = pct(progress.stats[id]);
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    row.innerHTML = `
+      <div class="wp">${w[state.fromLang]}</div>
+      <div class="wn">${w[state.toLang]}</div>
+      <div class="wb"><div class="f" style="width:${p}%"></div></div>
+      <div class="wpct">${p}%</div>
+    `;
+    list.appendChild(row);
+  });
+  document.getElementById('resetBtn').onclick = () => {
+    if(confirm('Weet je zeker dat je de voortgang voor ' + LANGS[state.fromLang].label + ' → ' + LANGS[state.toLang].label + ' wilt resetten?')){
+      const pp = state.packageProgress[state.selectedPackage];
+      pp[directionKey()] = emptyProgress();
+      initPool(pp[directionKey()], currentWords());
+      lastShownId = null;
+      currentQuestion = null;
+      currentView = 'quiz';
+      saveState();
+      renderApp();
+    }
+  };
+}
+
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.lang-dropdown')){
+    document.querySelectorAll('.lang-menu.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+async function boot(){
+  await loadState();
+  if(state.selectedPackage){
+    ensurePackageProgress(state.selectedPackage);
+    ensureStreak(state.selectedPackage, directionKey());
+  }
+  currentView = state.selectedPackage ? 'quiz' : 'package';
+  if(state.selectedPackage) buildQuestion();
+  renderApp();
+}
+
+boot();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is optional; app still works without it */ });
+  });
+}
+</script>
+</body>
+</html>
+
